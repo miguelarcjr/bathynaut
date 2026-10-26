@@ -1,9 +1,11 @@
-import Graph from 'graphology';
+import graphology from 'graphology';
 import { Database } from 'better-sqlite3';
 import { getAllNodes, getAllEdges } from '../storage/queries.js';
 
-export function buildGraphFromDatabase(db: Database): Graph {
-  const graph = new Graph({ multi: false, type: 'directed' });
+const GraphConstructor: any = (graphology as any).default || graphology;
+
+export function buildGraphFromDatabase(db: Database): any {
+  const graph = new GraphConstructor({ multi: false, type: 'directed' });
 
   const nodes = getAllNodes(db);
   const edges = getAllEdges(db);

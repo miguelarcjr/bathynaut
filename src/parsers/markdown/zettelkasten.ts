@@ -23,7 +23,7 @@ export interface ParsedZettelNote {
 export function parseZettelkastenNote(filePath: string, fileContent: string): ParsedZettelNote {
   const { data, content } = matter(fileContent);
   const validated = NoteFrontmatterSchema.safeParse(data);
-  const frontmatter = validated.success ? validated.data : {};
+  const frontmatter: any = validated.success ? validated.data : (data || {});
 
   const fileStem = path.basename(filePath, path.extname(filePath));
   const id = frontmatter.id || fileStem;
@@ -31,7 +31,7 @@ export function parseZettelkastenNote(filePath: string, fileContent: string): Pa
   // Category resolution: frontmatter > folder name > 'decisions'
   const parentFolder = path.basename(path.dirname(filePath));
   const category = frontmatter.category || 
-    (['decisions', 'incidents', 'patterns', 'entities'].includes(parentFolder) ? parentFolder as any : 'decisions');
+    (['decisions', 'incidents', 'patterns', 'entities'].includes(parentFolder) ? parentFolder : 'decisions');
 
   const appliesTo: string[] = frontmatter.applies_to 
     ? (Array.isArray(frontmatter.applies_to) ? frontmatter.applies_to : [frontmatter.applies_to])

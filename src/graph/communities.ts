@@ -1,6 +1,7 @@
-import Graph from 'graphology';
-import louvain from 'graphology-communities-louvain';
+import louvainPkg from 'graphology-communities-louvain';
 import { Database } from 'better-sqlite3';
+
+const louvain: any = (louvainPkg as any).default || louvainPkg;
 
 export interface CommunityResult {
   id: number;
@@ -9,24 +10,24 @@ export interface CommunityResult {
   members: string[];
 }
 
-export function detectAndPersistCommunities(graph: Graph, db?: Database): CommunityResult[] {
-  if (graph.order === 0) return [];
+export function detectAndPersistCommunities(graph: any, db?: Database): CommunityResult[] {
+  if (!graph || graph.order === 0) return [];
 
   // Run Louvain community detection
-  const communitiesMap = louvain(graph);
+  const communitiesMap = louvain(graph) as Record<string, number>;
 
   // Group nodes by community id
   const grouped = new Map<number, string[]>();
   for (const [nodeId, commId] of Object.entries(communitiesMap)) {
-    const list = grouped.get(commId) || [];
+    const numericId = Number(commId);
+    const list = grouped.get(numericId) || [];
     list.push(nodeId);
-    grouped.set(commId, list);
+    grouped.set(numericId, list);
   }
 
   const results: CommunityResult[] = [];
 
   for (const [commId, members] of grouped.entries()) {
-    // Generate an automatic name based on most common directory stem or node names
     const filePaths = members
       .map(id => graph.getNodeAttribute(id, 'file_path'))
       .filter(Boolean) as string[];

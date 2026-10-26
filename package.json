@@ -12,7 +12,8 @@
     "build": "tsc",
     "test": "vitest run",
     "test:watch": "vitest",
-    "start": "node dist/cli/main.js"
+    "start": "node dist/cli/main.js",
+    "postbuild": "node scripts/copy-assets.mjs"
   },
   "keywords": [
     "ai",
