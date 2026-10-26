@@ -1,0 +1,50 @@
+{
+  "name": "bathynaut",
+  "version": "0.1.0",
+  "description": "The Unified Oceanic Cognitive Architecture & Memory Harness for AI Coding Agents",
+  "type": "module",
+  "bin": {
+    "bathynaut": "./bin/bathynaut.js"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "start": "node dist/cli/main.js"
+  },
+  "keywords": [
+    "ai",
+    "agent",
+    "mcp",
+    "knowledge-graph",
+    "memory",
+    "ast",
+    "tree-sitter",
+    "zettelkasten",
+    "adr"
+  ],
+  "author": "Miguel Arc & Antigravity",
+  "license": "MIT",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.4",
+    "better-sqlite3": "^11.5.0",
+    "commander": "^12.1.0",
+    "graphology": "^0.25.4",
+    "graphology-communities-louvain": "^2.0.0",
+    "graphology-metrics": "^2.3.0",
+    "graphology-shortest-path": "^2.1.0",
+    "gray-matter": "^4.0.3",
+    "minimatch": "^10.0.1",
+    "tree-sitter-wasms": "^0.1.13",
+    "web-tree-sitter": "^0.22.6",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.11",
+    "@types/node": "^22.0.0",
+    "typescript": "^5.6.0",
+    "vitest": "^2.1.0"
+  }
+}
