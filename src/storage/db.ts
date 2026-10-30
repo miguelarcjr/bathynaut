@@ -28,20 +28,27 @@ function createDatabaseInstance(dbPath: string): Database {
     const { DatabaseSync } = require('node:sqlite');
     const rawDb = new DatabaseSync(dbPath);
 
+    const sanitizeValue = (val: any) => {
+      if (val === undefined) return null;
+      if (typeof val === 'boolean') return val ? 1 : 0;
+      return val;
+    };
+
     const normalizeNamedParams = (args: any[]) => {
       if (args.length === 1 && args[0] && typeof args[0] === 'object' && !Array.isArray(args[0]) && !(args[0] instanceof Uint8Array)) {
         const obj = args[0];
         const mapped: Record<string, any> = {};
         for (const [k, v] of Object.entries(obj)) {
+          const clean = sanitizeValue(v);
           if (k.startsWith('@') || k.startsWith(':') || k.startsWith('$')) {
-            mapped[k] = v;
+            mapped[k] = clean;
           } else {
-            mapped[`@${k}`] = v;
+            mapped[`@${k}`] = clean;
           }
         }
         return [mapped];
       }
-      return args;
+      return args.map(sanitizeValue);
     };
 
     const cloneRow = (row: any) => (row && typeof row === 'object' ? { ...row } : row);

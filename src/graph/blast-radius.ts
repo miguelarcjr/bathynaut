@@ -100,11 +100,12 @@ export function calculateBlastRadius(
 
     const incoming = getIncomingEdges(db, id);
     for (const edge of incoming) {
-      if (edge.relation === 'calls' || edge.relation === 'imports' || edge.relation === 'tests_for') {
+      if (edge.relation === 'calls' || edge.relation === 'imports' || edge.relation === 'tests_for' || edge.relation === 'tested_by') {
         const callerNode = getNodeById(db, edge.source_id);
         const callerFile = callerNode?.file_path?.replace(/\\/g, '/') || '';
         const isTestCaller =
           edge.relation === 'tests_for' ||
+          edge.relation === 'tested_by' ||
           callerNode?.kind === 'test' ||
           callerFile.includes('.spec.') ||
           callerFile.includes('.test.');
@@ -201,7 +202,7 @@ export function calculateBlastRadius(
             result.governing_adrs.push({
               id: adrNode.id,
               title: adrNode.name,
-              summary: adrNode.summary,
+              summary: adrNode.summary || '',
               enforcement,
               invariants,
               stale_warning: staleWarning
@@ -230,7 +231,7 @@ export function calculateBlastRadius(
                 result.known_incidents.push({
                   id: incidentNode.id,
                   title: incidentNode.name,
-                  warning: incidentNode.summary
+                  warning: incidentNode.summary || ''
                 });
               }
             }

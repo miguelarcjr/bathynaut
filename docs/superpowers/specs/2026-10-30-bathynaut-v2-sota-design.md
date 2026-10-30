@@ -298,3 +298,4 @@ A suíte Vitest (`tests/`) validará cada subsistema com testes determinísticos
 3. **`tests/incremental-sync.spec.ts`**: Verifica que editar 1 arquivo atualiza apenas aquele arquivo via `ensureFreshGraph` em tempo sub-50ms e marca `needs_review = 1` (Stale ADR) nas ADRs que governam a função alterada.
 4. **`tests/rrf-and-sonar.spec.ts`**: Verifica a busca híbrida RRF (incluindo busca em linguagem natural encontrando identificadores `camelCase`), empacotamento por `token_budget` com citações `file:line_start-line_end`, cálculo de Execution Flows e `git diff` Risk Scoring.
 5. **`tests/e2e-workflow.spec.ts`**: Fluxo E2E completo (`init` -> `map` -> `MCP tools` -> `review` -> `lint` -> `disconnect`).
+

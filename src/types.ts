@@ -1,4 +1,4 @@
-export type DepthZone = 'sunlight' | 'twilight' | 'abyssal';
+export type DepthZone = 'sunlight' | 'twilight' | 'abyssal' | 'epipelagic' | 'mesopelagic';
 
 export type NodeKind =
   | 'function'
@@ -27,6 +27,7 @@ export type RelationType =
   | 'mentions'
   | 'shares_scope_with'
   | 'tests_for'
+  | 'tested_by'
   | 'governed_by'
   | 'belongs_to';
 
@@ -56,7 +57,7 @@ export interface NodeRecord {
   in_degree?: number;
   out_degree?: number;
   is_bridge?: number;
-  summary: string;
+  summary?: string;
   status?: NoteStatus;
   enforcement?: EnforcementLevel;
   applies_to_json?: string;

@@ -1,7 +1,7 @@
 {
   "name": "bathynaut",
-  "version": "0.1.0",
-  "description": "The Unified Oceanic Cognitive Architecture & Memory Harness for AI Coding Agents",
+  "version": "0.2.0",
+  "description": "The Unified Oceanic Cognitive Architecture & Memory Harness for AI Coding Agents (CoALA + AST + Zettelkasten + Hybrid RRF)",
   "type": "module",
   "bin": {
     "bathynaut": "./bin/bathynaut.js"

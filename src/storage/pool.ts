@@ -66,6 +66,7 @@ export function resolveMemoryVault(projectRoot: string): {
 }
 
 export function registerProjectInGlobalRegistry(projectRoot: string, memoryRoot: string): void {
+  if (process.env.VITEST || process.env.NODE_ENV === 'test') return;
   try {
     const registryDir = path.join(os.homedir(), '.bathynaut');
     fs.mkdirSync(registryDir, { recursive: true });

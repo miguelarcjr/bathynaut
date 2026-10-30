@@ -171,3 +171,4 @@
 - [ ] **Step 3: Implementar todas as ferramentas MCP v0.2, comandos CLI (`review.ts`, `disconnect.ts`, `main.ts`), exportar no `src/index.ts` e atualizar `README.md`**
 - [ ] **Step 4: Rodar `npm test` (suíte completa) e `npm run build` em `d:\projetos\bathynaut` garantindo 100% de aprovação**
 - [ ] **Step 5: Commit `feat(bathynaut): lancar v0.2 sota com mcp just-in-time, review cli e readme atualizado`**
+

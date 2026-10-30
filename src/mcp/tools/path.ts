@@ -5,13 +5,13 @@ import shortestPath from 'graphology-shortest-path';
 
 export const PathSchema = z.object({
   from: z.string().describe('ID do no ou nome do simbolo de origem'),
-  to: z.string().describe('ID do no ou nome do simbolo de destino')
+  to: z.string().describe('ID do no ou nome do simbolo de destino'),
+  project_path: z.string().optional().describe('Caminho opcional do repositorio')
 });
 
 export function handlePath(db: Database, args: z.infer<typeof PathSchema>) {
   const graph = buildGraphFromDatabase(db);
-  
-  // Resolve node IDs if symbol names were passed
+
   let fromId = args.from;
   let toId = args.to;
 
@@ -38,11 +38,43 @@ export function handlePath(db: Database, args: z.infer<typeof PathSchema>) {
 
   const path = shortestPath.bidirectional(graph, fromId, toId);
 
+  const edges: Array<{ from: string; to: string; relation: string; confidence: string; snippet?: string | null }> = [];
+  if (path && path.length > 1) {
+    for (let i = 0; i < path.length - 1; i++) {
+      const u = path[i];
+      const v = path[i + 1];
+      const edgeRow = db.prepare(`
+        SELECT source_id, target_id, relation, confidence, context_snippet
+        FROM edges
+        WHERE (source_id = ? AND target_id = ?) OR (source_id = ? AND target_id = ?)
+        LIMIT 1
+      `).get(u, v, v, u) as { source_id: string; target_id: string; relation: string; confidence: string; context_snippet: string | null } | undefined;
+
+      edges.push({
+        from: u,
+        to: v,
+        relation: edgeRow?.relation || 'connected',
+        confidence: edgeRow?.confidence || 'EXTRACTED',
+        snippet: edgeRow?.context_snippet ?? null
+      });
+    }
+  }
+
   return {
     content: [
       {
         type: 'text',
-        text: JSON.stringify({ from: fromId, to: toId, hops: path ? path.length - 1 : 0, path: path || 'Sem conexao direta' }, null, 2)
+        text: JSON.stringify(
+          {
+            from: fromId,
+            to: toId,
+            hops: path ? path.length - 1 : 0,
+            path: path || 'Sem conexao direta',
+            edges
+          },
+          null,
+          2
+        )
       }
     ]
   };

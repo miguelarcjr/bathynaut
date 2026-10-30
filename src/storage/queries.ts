@@ -80,7 +80,7 @@ export function upsertNode(db: Database, node: NodeRecord): void {
     in_degree: node.in_degree ?? 0,
     out_degree: node.out_degree ?? 0,
     is_bridge: node.is_bridge ?? 0,
-    summary: node.summary,
+    summary: node.summary ?? node.name ?? '',
     status: node.status ?? 'active',
     enforcement: node.enforcement ?? 'advisory',
     applies_to_json: node.applies_to_json ?? '[]',
@@ -102,7 +102,7 @@ export function upsertNode(db: Database, node: NodeRecord): void {
       node.name,
       tokenized,
       node.signature ?? '',
-      node.summary,
+      node.summary ?? node.name ?? '',
       node.docstring ?? '',
       node.body_markdown ?? ''
     );

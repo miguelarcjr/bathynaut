@@ -11,7 +11,8 @@ export interface DetectedAgent {
 
 export function detectInstalledAgents(projectRoot: string): DetectedAgent[] {
   const agents: DetectedAgent[] = [];
-  const homeDir = os.homedir();
+  const isTestEnv = Boolean(process.env.VITEST || process.env.NODE_ENV === 'test');
+  const homeDir = isTestEnv ? path.join(projectRoot, '.bathynaut', 'test-home') : os.homedir();
 
   // 1. Claude Code
   const claudeConfig = path.join(homeDir, '.claude.json');
