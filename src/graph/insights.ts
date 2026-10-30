@@ -138,7 +138,7 @@ export function detectKnowledgeGaps(db: Database): KnowledgeGap[] {
         size: comm.size,
         cohesion: comm.cohesion,
         god_node_id: comm.god_node_id ?? null,
-        recommendation: `Comunidade "${comm.name}" (${comm.size} simbolos) nao possui nenhuma ADR ou nota de arquitetura governante. Registre invariantes via bathynaut_log_adr.`
+        recommendation: `Community "${comm.name}" (${comm.size} symbols) has no governing ADR or architecture note. Record invariants via bathynaut_log_adr.`
       });
     }
   }
@@ -292,8 +292,8 @@ export function generateCommunityArchitectureNotes(memoryRoot: string, db: Datab
 
     const markdown = `---
 id: ${noteId}
-title: "Subsistema Topologico: ${comm.name}"
-summary: "Cluster funcional detectado via Louvain (${comm.size} simbolos, coesao ${comm.cohesion})."
+title: "Topological Subsystem: ${comm.name}"
+summary: "Functional cluster detected via Louvain (${comm.size} symbols, cohesion ${comm.cohesion})."
 category: architecture
 status: active
 enforcement: advisory
@@ -304,13 +304,13 @@ symbols:
 ${symbolsList.map(s => `  - "${s}"`).join('\n')}
 ---
 
-# Subsistema Topologico: ${comm.name}
+# Topological Subsystem: ${comm.name}
 
-## Visao Geral Estrutural
-Comunidade funcional detectada automaticamente pelo motor topologico do Bathynaut com **${comm.size} simbolos** e indice de coesao interna **${comm.cohesion}**.
+## Structural Overview
+Functional community automatically detected by Bathynaut's topological engine with **${comm.size} symbols** and internal cohesion index **${comm.cohesion}**.
 
-## Principais Simbolos e Centros de Gravidade (God Nodes)
-${members.map(m => `- \`${m.name}\` (${m.kind} em \`${m.file_path || 'N/A'}\`)`).join('\n')}
+## Key Symbols & Gravity Centers (God Nodes)
+${members.map(m => `- \`${m.name}\` (${m.kind} in \`${m.file_path || 'N/A'}\`)`).join('\n')}
 `;
 
     fs.writeFileSync(notePath, markdown, 'utf-8');

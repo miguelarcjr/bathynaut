@@ -61,7 +61,7 @@ export function computeScopeSharingEdges(notes: ParsedZettelNote[]): EdgeRecord[
       // 1. Check shared symbols
       const sharedSym = a.symbols.find(s => b.symbols.includes(s));
       if (sharedSym) {
-        sharedReason = `Simbolo compartilhado: ${sharedSym}`;
+        sharedReason = `Shared symbol: ${sharedSym}`;
       }
 
       // 2. Check overlapping applies_to globs
@@ -78,7 +78,7 @@ export function computeScopeSharingEdges(notes: ParsedZettelNote[]): EdgeRecord[
               minimatch(normB, normA) ||
               (prefixA.length > 3 && prefixB.length > 3 && (prefixA.startsWith(prefixB) || prefixB.startsWith(prefixA)))
             ) {
-              sharedReason = `Escopo sobreposto: ${ga} <-> ${gb}`;
+              sharedReason = `Overlapping scope: ${ga} <-> ${gb}`;
               break;
             }
           }
@@ -141,8 +141,8 @@ export function generateMOCIndex(memoryRoot: string, db: Database): void {
     }
 
     const lines: string[] = [
-      '# Mapa Mestre de Conteudo (MOC) — Bathynaut SOTA',
-      `> Atualizado automaticamente em: ${new Date().toISOString().split('T')[0]} | Total de notas: ${abyssalNodes.length}`,
+      '# Master Map of Content (MOC) — Bathynaut SOTA',
+      `> Auto-updated on: ${new Date().toISOString().split('T')[0]} | Total notes: ${abyssalNodes.length}`,
       ''
     ];
 
@@ -150,7 +150,7 @@ export function generateMOCIndex(memoryRoot: string, db: Database): void {
       const list = grouped[section] || [];
       lines.push(`## ${section} (${list.length})`);
       if (list.length === 0) {
-        lines.push('_Nenhuma nota registrada nesta categoria._');
+        lines.push('_No notes recorded in this category yet._');
       } else {
         for (const item of list) {
           const badge = item.enforcement === 'blocking' ? ' `[BLOCKING]`' : '';

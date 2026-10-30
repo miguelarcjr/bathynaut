@@ -95,7 +95,7 @@ export function evaluateHookGuard(
           const staleCount = (
             db.prepare("SELECT COUNT(DISTINCT target_id) as c FROM edges WHERE relation = 'governed_by' AND needs_review = 1").get() as any
           )?.c ?? 0;
-          lines.push(`Grafo ativo: ${nodeCount} nos, ${edgeCount} arestas (${staleCount} ADRs pendentes de revisao).`);
+          lines.push(`Active Graph: ${nodeCount} nodes, ${edgeCount} edges (${staleCount} ADRs flagged for review).`);
         } finally {
           db.close();
         }
@@ -110,7 +110,7 @@ export function evaluateHookGuard(
       }
 
       lines.push(
-        'Lembrete de Protocolo: Antes de editar arquivos de codigo, invoque `bathynaut_sonar({ files: [...] })`.'
+        'Protocol Reminder: Before editing any code files, invoke `bathynaut_sonar({ files: [...] })`.'
       );
 
       return {
@@ -181,7 +181,7 @@ export function evaluateHookGuard(
         if (matchedAdrs.length === 0) return {};
 
         const warnings: string[] = [
-          `⚠️ [Bathynaut Sonar Guard] Invariantes ativos governando ${relPaths.join(', ')}:`
+          `⚠️ [Bathynaut Sonar Guard] Active invariants governing ${relPaths.join(', ')}:`
         ];
         for (const adr of matchedAdrs) {
           let invs: string[] = [];

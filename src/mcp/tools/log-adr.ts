@@ -11,18 +11,18 @@ import { generateMOCIndex } from '../../parsers/markdown/scanner.js';
 const EdgeListOrString = z.union([z.string(), z.array(z.string())]).optional();
 
 export const LogAdrSchema = z.object({
-  id: z.string().regex(/^[a-z0-9-]+$/).optional().describe('ID declarativo opcional em kebab-case para criar ou recompilar uma nota existente (ex: adr-001-auth-jwt)'),
-  title: z.string().describe('Titulo conciso da nota ou decisao arquitetural'),
-  summary: z.string().max(240).optional().describe('Resumo de ate 180 caracteres para o index.md'),
-  category: z.enum(['decisions', 'incidents', 'patterns', 'entities', 'architecture']).default('decisions').describe('Categoria da taxonomia CoALA'),
-  context: z.string().optional().default('').describe('Contexto e razao pela qual a decisao/nota foi criada'),
-  decision: z.string().optional().default('').describe('A decisao tomada ou especificacao detalhada'),
-  body_markdown: z.string().max(6000).optional().describe('Corpo completo opcional em Markdown (alternativa a context + decision)'),
-  enforcement: z.enum(['blocking', 'warning', 'advisory']).default('advisory').describe('Nivel de enforcement arquitetural'),
-  invariants: z.array(z.string()).default([]).describe('Lista de invariantes verificaveis desta decisao'),
-  applies_to: z.array(z.string()).default([]).describe('Padroes glob de arquivos afetados por essa decisao (ex: ["src/routes/auth*"])'),
-  symbols: z.array(z.string()).default([]).describe('Simbolos de codigo explicitamente governados (ex: ["checkQuota", "AuthService"])'),
-  sources: z.array(z.string()).default([]).describe('Fontes brutas em raw/ ou docs compiladas por esta nota (ex: ["raw/rfc-001.md"])'),
+  id: z.string().regex(/^[a-z0-9-]+$/).optional().describe('Optional declarative kebab-case ID to create or recompile an existing note (e.g., adr-001-auth-jwt)'),
+  title: z.string().describe('Concise title of the note or architectural decision'),
+  summary: z.string().max(240).optional().describe('Short summary (up to 180 chars) for index.md'),
+  category: z.enum(['decisions', 'incidents', 'patterns', 'entities', 'architecture']).default('decisions').describe('CoALA taxonomy category'),
+  context: z.string().optional().default('').describe('Context and rationale for why this decision/note was created'),
+  decision: z.string().optional().default('').describe('The decision taken or detailed technical specification'),
+  body_markdown: z.string().max(6000).optional().describe('Optional full Markdown body (alternative to context + decision)'),
+  enforcement: z.enum(['blocking', 'warning', 'advisory']).default('advisory').describe('Architectural enforcement level'),
+  invariants: z.array(z.string()).default([]).describe('List of verifiable invariants for this decision'),
+  applies_to: z.array(z.string()).default([]).describe('File scope glob patterns governed by this decision (e.g., ["src/routes/auth*"])'),
+  symbols: z.array(z.string()).default([]).describe('Code symbols explicitly governed (e.g., ["checkQuota", "AuthService"])'),
+  sources: z.array(z.string()).default([]).describe('Raw sources in raw/ or docs compiled by this note (e.g., ["raw/rfc-001.md"])'),
   edges: z.object({
     supersedes: z.array(z.string()).default([]),
     depends_on: z.array(z.string()).default([]),
@@ -32,15 +32,15 @@ export const LogAdrSchema = z.object({
     caused_by: z.array(z.string()).default([]),
     verified_by: z.array(z.string()).default([])
   }).optional(),
-  supersedes: EdgeListOrString.describe('ID(s) de ADR anterior substituida por esta'),
-  mitigates: EdgeListOrString.describe('ID(s) de incidente que esta decisao mitiga'),
-  caused_by: EdgeListOrString.describe('ID(s) de causa raiz se for um incidente'),
-  depends_on: EdgeListOrString.describe('ID(s) de nota da qual esta depende'),
-  implements: EdgeListOrString.describe('ID(s) de padrao ou arquitetura que esta nota implementa'),
-  tensions_with: EdgeListOrString.describe('ID(s) de nota com trade-off ou tensao arquitetural'),
-  verified_by: EdgeListOrString.describe('ID(s) ou suite de testes que verifica este invariante'),
-  project_path: z.string().optional().describe('Caminho opcional do repositorio'),
-  workspace_hint: z.string().optional().describe('Alias para project_path')
+  supersedes: EdgeListOrString.describe('ID(s) of previous ADR(s) superseded by this note'),
+  mitigates: EdgeListOrString.describe('ID(s) of incident(s) mitigated by this decision'),
+  caused_by: EdgeListOrString.describe('ID(s) of root cause(s) if this is an incident'),
+  depends_on: EdgeListOrString.describe('ID(s) of note(s) this note depends on'),
+  implements: EdgeListOrString.describe('ID(s) of pattern(s) or architecture implemented by this note'),
+  tensions_with: EdgeListOrString.describe('ID(s) of note(s) with trade-off or architectural tension'),
+  verified_by: EdgeListOrString.describe('ID(s) or test suite verifying this invariant'),
+  project_path: z.string().optional().describe('Optional repository path'),
+  workspace_hint: z.string().optional().describe('Alias for project_path')
 });
 
 const CATEGORY_PREFIX: Record<string, string> = {
@@ -103,7 +103,7 @@ export function handleLogAdr(db: Database, memoryRoot: string, rawInput: z.input
 
   const bodyText = args.body_markdown
     ? `${args.body_markdown.trim()}${typedRelationsLines.length > 0 ? '\n\n' + typedRelationsLines.join('\n') : ''}`
-    : `# ${args.title}\n\n## Contexto\n${args.context}\n\n## Decisao\n${args.decision}${typedRelationsLines.length > 0 ? '\n\n' + typedRelationsLines.join('\n') : ''}`;
+    : `# ${args.title}\n\n## Context\n${args.context}\n\n## Decision\n${args.decision}${typedRelationsLines.length > 0 ? '\n\n' + typedRelationsLines.join('\n') : ''}`;
 
   const frontmatterObj: Record<string, any> = {
     id: noteId,

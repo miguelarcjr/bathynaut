@@ -20,37 +20,37 @@ export function scaffoldMemoryVault(projectRoot: string): string {
 
   const activeContextPath = path.join(memoryDir, 'activeContext.md');
   if (!fs.existsSync(activeContextPath)) {
-    fs.writeFileSync(activeContextPath, `# Estado Ativo da Sessao (Bathynaut v0.2 SOTA)
-> Inicializado em: ${new Date().toISOString()}
+    fs.writeFileSync(activeContextPath, `# Active Session Context (Bathynaut v0.2 SOTA)
+> Initialized at: ${new Date().toISOString()}
 
-## Resumo do Projeto
-Repositorio equipado com o harness cognitivo Bathynaut (AST + Topologia + Zettelkasten CoALA).
+## Project Summary
+Repository equipped with the Bathynaut cognitive harness (AST Call Graph + Louvain/PageRank Topology + CoALA Zettelkasten Memory).
 
-## Proximas Tarefas Ativas
-- [ ] Explorar topologia macro com bathynaut_dive
-- [ ] Inspecionar blast radius antes de editar com bathynaut_sonar
+## Next Active Tasks
+- [ ] Explore macro topology with bathynaut_dive
+- [ ] Inspect pre-edit blast radius with bathynaut_sonar
 `, 'utf-8');
   }
 
   const indexPath = path.join(memoryDir, 'index.md');
   if (!fs.existsSync(indexPath)) {
-    fs.writeFileSync(indexPath, `# Mapa Mestre de Conteudo (MOC) — Bathynaut SOTA
-> Gerado automaticamente. Vault Zettelkasten conectado a AST.
+    fs.writeFileSync(indexPath, `# Master Map of Content (MOC) — Bathynaut SOTA
+> Auto-generated. CoALA Zettelkasten Vault interlinked with AST.
 
 ## DECISIONS (0)
-_Nenhuma nota registrada nesta categoria._
+_No notes recorded in this category yet._
 
 ## INCIDENTS (0)
-_Nenhuma nota registrada nesta categoria._
+_No notes recorded in this category yet._
 
 ## PATTERNS (0)
-_Nenhuma nota registrada nesta categoria._
+_No notes recorded in this category yet._
 
 ## ENTITIES (0)
-_Nenhuma nota registrada nesta categoria._
+_No notes recorded in this category yet._
 
 ## ARCHITECTURE (0)
-_Nenhuma nota registrada nesta categoria._
+_No notes recorded in this category yet._
 `, 'utf-8');
   }
 

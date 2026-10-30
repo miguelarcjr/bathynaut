@@ -5,6 +5,11 @@
 ### The Unified Oceanic Cognitive Architecture, Code Graph & Zettelkasten Memory Harness for AI Coding Agents
 
 <p align="center">
+  <a href="README.md"><b>English</b></a> |
+  <a href="README.pt-BR.md">Português (Brasil)</a>
+</p>
+
+<p align="center">
   <a href="https://github.com/miguelarc/bathynaut"><img src="https://img.shields.io/badge/version-0.2.0--SOTA-00d2ff?style=flat-square&labelColor=0a192f" alt="Version 0.2.0 SOTA"></a>
   <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/License-MIT-f59e0b?style=flat-square&labelColor=0a192f" alt="License: MIT"></a>
   <a href="https://nodejs.org"><img src="https://img.shields.io/badge/Node.js-%3E%3D18%20%7C%2022%2B%20native%20sqlite-10b981?style=flat-square&labelColor=0a192f" alt="Node >= 18"></a>
@@ -27,8 +32,8 @@
   <a href="#-quick-start-30-seconds">⚡ Quick Start</a> ·
   <a href="#-why-bathynaut-compared-with-the-ecosystem">🏆 Ecosystem Comparison</a> ·
   <a href="#-the-oceanic-7-mcp-tools">🎯 MCP Tools</a> ·
-  <a href="#-universal-multi-agent-harness">🪝 Hooks, Skills & Rules</a> ·
-  <a href="#-3-column-ocean-canvas-ide-explorer">🖥️ Visual Explorer</a> ·
+  <a href="#-universal-multi-agent-harness-hooks-skills-rules--mcp">🪝 Hooks, Skills & Rules</a> ·
+  <a href="#-3-column-ocean-canvas-ide-explorer-bathynauthtml">🖥️ Visual Explorer</a> ·
   <a href="#-cli-reference">🛠️ CLI Reference</a>
 </p>
 
@@ -41,28 +46,25 @@
 Don't want to configure anything manually? Copy and paste the block below directly into **Antigravity**, **Claude Code**, **Cursor**, **Windsurf**, **GitHub Copilot**, or **OpenCode**. Your agent will install Bathynaut, wire up its own MCP server, hooks, rules, and skills, build the AST + Zettelkasten graph, and map your project's architecture automatically:
 
 <details open>
-<summary><b>📋 Copy-Paste Self-Setup Prompt for Any AI Coding Agent (Português / English)</b></summary>
+<summary><b>📋 Copy-Paste Self-Setup Prompt for Any AI Coding Agent</b></summary>
 
 ```markdown
-Quero que você instale, configure e inicialize o **Bathynaut** (Unified Oceanic Cognitive Architecture & Memory Harness) neste repositório de forma 100% autônoma seguindo os passos abaixo:
+Install, configure, and initialize **Bathynaut** (Unified Oceanic Cognitive Architecture & Memory Harness) in this repository autonomously by following these steps:
 
-1. **Instalação & Inicialização em 1 Comando**:
-   - Se o pacote `bathynaut` já estiver publicado ou disponível via npm, execute na raiz deste projeto:
-     `npx bathynaut init -d "."`
-   - Caso estejamos usando o repositório local do Bathynaut (ex: `d:/projetos/bathynaut`), faça o build dele (`npm --prefix "d:/projetos/bathynaut" run build`) e execute:
-     `node "d:/projetos/bathynaut/dist/cli/main.js" init -d "."`
+1. **One-Command Initialization**:
+   - Run `npx bathynaut init -d "."` in the root of this repository (or if running from a local Bathynaut clone, build it first with `npm run build` and run `node <path-to-bathynaut>/dist/cli/main.js init -d "."`).
 
-2. **Verificação da Infraestrutura Criada**:
-   Confirme que o comando `init` gerou e configurou automaticamente:
-   - Cofre Zettelkasten CoALA em `.bathynaut/memory/` (`activeContext.md`, `index.md`, `wiki/decisions`, `wiki/incidents`, `wiki/patterns`, `wiki/entities`, `wiki/architecture`, `raw/`).
-   - Banco de grafo unificado `.bathynaut/ocean.db` e explorador interativo `.bathynaut/bathynaut.html`.
-   - Regras nativas com Context Includes (`AGENTS.md`, `GEMINI.md`, `.agents/rules/bathynaut.md`, `CLAUDE.md`, `.cursor/rules/bathynaut.mdc`).
-   - 6 Cognitive Skills em `.agents/skills/bathynaut-*`, `.claude/skills/bathynaut-*` e `.cursor/skills/bathynaut-*`.
-   - Agent Lifecycle Hooks (`SessionStart` e `PreToolUse`) em `.agents/hooks.json`, `.claude/settings.json` e `.cursor/hooks.json`, além dos Git hooks (`post-merge`, `post-commit`, `post-checkout`).
+2. **Verify Generated Infrastructure**:
+   Confirm that `init` created and configured:
+   - The CoALA Zettelkasten vault in `.bathynaut/memory/` (`activeContext.md`, `index.md`, `wiki/decisions`, `wiki/incidents`, `wiki/patterns`, `wiki/entities`, `wiki/architecture`, `raw/`).
+   - The unified SQLite graph `.bathynaut/ocean.db` and interactive visual explorer `.bathynaut/bathynaut.html`.
+   - Native agent rules with progressive-disclosure context includes (`AGENTS.md`, `GEMINI.md`, `.agents/rules/bathynaut.md`, `CLAUDE.md`, `.cursor/rules/bathynaut.mdc`).
+   - All 6 Cognitive Skills in `.agents/skills/bathynaut-*`, `.claude/skills/bathynaut-*`, and `.cursor/skills/bathynaut-*`.
+   - Agent Lifecycle Hooks (`SessionStart` and `PreToolUse`) in `.agents/hooks.json`, `.claude/settings.json`, and `.cursor/hooks.json`, plus Git hooks (`post-merge`, `post-commit`, `post-checkout`).
 
-3. **Auditoria de Saúde e Mapeamento Arquitetural Inicial**:
-   - Execute `bathynaut doctor` (ou a tool MCP `bathynaut_lint({})` / `bathynaut_dive({})`) para inspecionar as Comunidades Louvain, os God Nodes (PageRank), os Execution Flows, as `surprising_connections` e os `knowledge_gaps`.
-   - Liste todos os arquivos que foram criados/modificados e me apresente um resumo executivo da topologia descoberta neste projeto.
+3. **Health Audit & Initial Architectural Overview**:
+   - Run `npx bathynaut doctor` (or call the MCP tools `bathynaut_lint({})` and `bathynaut_dive({})`) to inspect Louvain Communities, God Nodes (PageRank), Execution Flows, `surprising_connections`, and `knowledge_gaps`.
+   - List every file created or modified and present a concise executive summary of this repository's discovered topology.
 ```
 
 </details>
@@ -161,15 +163,13 @@ flowchart TD
 $ npx bathynaut review src/auth.ts
 
 🚨 [Bathynaut Review] Risk Level: HIGH (Score: 0.68)
-   • Arquivos Alvo (1): src/auth.ts
-   • Simbolos Modificados (2): validateToken, requireAuth
-   • Blast Radius (6 simbolos em 3 arquivos)
-   • Fluxos de Execucao Afetados (2): handleCheckout -> requireAuth -> validateToken
-   • Testes de Cobertura (1): tests/auth.spec.ts#testJwtValidation
-   ⚠️ Funcoes sem Cobertura de Teste (1): refreshSessionToken
-
-🛑 BLOCKING INVARIANTS ATIVOS (1):
-   • [adr-002-stateless-jwt] Nunca aceitar tokens HS256; exigir assinatura Ed25519 validada.
+   • Target Files (1): src/auth.ts
+   • Blast Radius (6 symbols across 3 files)
+   • Affected Execution Flows: 2
+   • Covering Tests (1): tests/auth.spec.ts#testJwtValidation
+   ⚠️ Untested Functions (1): refreshSessionToken
+   🛑 Active Blocking Invariants:
+      - [adr-002-stateless-jwt] Never accept HS256 tokens; enforce verified Ed25519 signatures.
 ```
 
 ### 2. Active Lifecycle Hook Guard (`PreToolUse` on `edit_file` / `write_file`)
@@ -178,7 +178,7 @@ When an agent attempts to edit a file governed by an active ADR, `bathynaut hook
 {
   "hookSpecificOutput": {
     "hookEventName": "PreToolUse",
-    "additionalContext": "⚠️ [Bathynaut Sonar Guard] Invariantes ativos governando src/payment.ts:\n- [BLOCKING] adr-001-idempotency-key (Exigir Idempotency Key em Cobrancas): Nunca processar cobranca sem idempotencyKey validada"
+    "additionalContext": "⚠️ [Bathynaut Sonar Guard] Active invariants governing src/payment.ts:\n- [BLOCKING] adr-001-idempotency-key (Require Idempotency Key on Charges): Never process a charge without a validated idempotencyKey"
   }
 }
 ```
@@ -238,11 +238,11 @@ When a governed function's AST `content_hash` (SHA-256) changes in code without 
 
 | MCP Tool | Key Parameters | What It Returns |
 | :--- | :--- | :--- |
-| **`bathynaut_sonar`** | `files`, `git_diff`, `token_budget`, `include_large_functions`, `min_lines`, `rename_symbol`, `project_path` | **Pre-Edit Radar**: `blocking_invariants` at the top, `risk_score` (`0..1`) + `risk_level`, `affected_nodes` (callers/callees), `affected_flows`, `covering_tests`, `untested_functions`, `governing_adrs`, `known_incidents`, `large_functions`, `rename_preview`, and token-packed `excerpts`. |
-| **`bathynaut_dive`** | `community_id`, `query`, `project_path` | **Macro Topology**: Louvain `communities` (with intra-cluster `cohesion`), `top_god_nodes` (PageRank), `bridge_nodes`, `top_flows`, `surprising_connections` (architectural drift), and `knowledge_gaps` (undocumented communities). |
+| **`bathynaut_sonar`** | `files`, `git_diff`, `token_budget`, `project_path` | **Pre-Edit Radar**: `blocking_invariants` at the top, `risk_score` (`0..1`) + `risk_level`, `affected_nodes` (callers/callees), `affected_flows`, `covering_tests`, `untested_functions`, `governing_adrs`, `known_incidents`, and token-packed `excerpts`. |
+| **`bathynaut_dive`** | `community_id`, `query`, `rename_symbol`, `new_name`, `project_path` | **Macro Topology**: Louvain `communities` (with intra-cluster `cohesion`), `top_god_nodes` (PageRank), `bridge_nodes`, `top_flows`, `surprising_connections` (architectural drift), `knowledge_gaps` (undocumented communities), `large_functions`, and `rename_preview`. |
 | **`bathynaut_path`** | `from`, `to`, `project_path` | **Acoustic Pathfinding**: Bidirectional BFS shortest path connecting any two code symbols or Zettelkasten notes with edge relations and confidence tiers (`EXTRACTED` / `INFERRED`). |
 | **`bathynaut_recall`** | `query`, `ids`, `category`, `include_superseded`, `cross_repo`, `limit`, `token_budget`, `project_path` | **Hybrid RRF & Batch Reader**: Combines FTS5 BM25 (with `camelCase`/`snake_case` splitting) + PageRank + 1-Hop outgoing edges & inverse backlinks. Supports direct batch read via `ids: [...]` (`wiki_read_compiled` parity) and federated `cross_repo` search across `~/.bathynaut/registry.json`. |
-| **`bathynaut_log_adr`** | `id`, `title`, `summary`, `category`, `context`, `decision`, `enforcement`, `invariants`, `applies_to`, `symbols`, `sources`, `edges`, `auto_generate_architecture_notes` | **CoALA Atomic Compiler**: Compiles/upserts validated Markdown notes, mutates superseded `.md` files on disk, tracks compiled `raw/` `sources`, auto-interlinks matching code AST nodes in SQLite, and regenerates `index.md`. |
+| **`bathynaut_log_adr`** | `id`, `title`, `summary`, `category`, `context`, `decision`, `enforcement`, `invariants`, `applies_to`, `symbols`, `sources`, `edges` | **CoALA Atomic Compiler**: Compiles/upserts validated Markdown notes, mutates superseded `.md` files on disk, tracks compiled `raw/` `sources`, auto-interlinks matching code AST nodes in SQLite, and regenerates `index.md`. |
 | **`bathynaut_checkpoint`** | `summary`, `active_tasks`, `decisions` | **Episodic Session Memory**: Persists hot working state to `activeContext.md` so the next session starts with full continuity. |
 | **`bathynaut_lint`** | `project_path` | **5D Graph Health Audit**: Reports `orphan_active_notes` (and `orphan_nodes`), `dangling_links` (and `broken_edges`), `stale_adrs`, `untested_god_nodes`, and `uncompiled_raw_sources` (distinguishing compiled vs. uncompiled files in `raw/`). |
 
@@ -256,7 +256,7 @@ Running `npx bathynaut init` configures the entire cognitive harness across 7 ma
 
 | Agent Platform | MCP Server Config (`-d <repo>` pinned) | Rules & Progressive Disclosure Includes | Auto-Discovered Skills (6 Workflows) | Agent Lifecycle & Git Hooks |
 | :--- | :--- | :--- | :--- | :--- |
-| **Antigravity** | `~/.gemini/antigravity/mcp_config.json` | `AGENTS.md`, `GEMINI.md`, `.agents/rules/bathynaut.md` (with `@[Contexto Ativo](.bathynaut/memory/activeContext.md)` & `@[Indice da Wiki](.bathynaut/memory/index.md)`) | `.agents/skills/bathynaut-*/SKILL.md` | `.agents/hooks.json` (`SessionStart`, `PreToolUse`) |
+| **Antigravity** | `~/.gemini/antigravity/mcp_config.json` | `AGENTS.md`, `GEMINI.md`, `.agents/rules/bathynaut.md` (with `@[Active Session Context](.bathynaut/memory/activeContext.md)` & `@[Wiki Index](.bathynaut/memory/index.md)`) | `.agents/skills/bathynaut-*/SKILL.md` | `.agents/hooks.json` (`SessionStart`, `PreToolUse`) |
 | **Claude Code** | `.mcp.json` (project) + `~/.claude.json` | `CLAUDE.md` (with `@.bathynaut/memory/activeContext.md` & `@.bathynaut/memory/index.md`) | `.claude/skills/bathynaut-*/SKILL.md` | `.claude/settings.json` (`SessionStart`, `PreToolUse`) |
 | **Cursor** | `.cursor/mcp.json` | `.cursor/rules/bathynaut.mdc` (`alwaysApply: true`, `globs: "**/*"`) + `.cursorrules` | `.cursor/skills/bathynaut-*/SKILL.md` | `.cursor/hooks.json` (`beforeShellExecution`) |
 | **Windsurf** | `~/.codeium/windsurf/mcp_config.json` | `.windsurfrules` + `AGENTS.md` | `.agents/skills/bathynaut-*/SKILL.md` | Git `post-merge`, `post-commit`, `post-checkout` |
@@ -279,8 +279,8 @@ Running `npx bathynaut init` configures the entire cognitive harness across 7 ma
 Run `npx bathynaut explore` to open the self-contained, zero-server interactive visual debugger in your browser:
 
 - **Left Sidebar (Filters, Tree & Sonar Glob Simulator)**:
-  - Filter by Depth Zone (`Sunlight`, `Twilight`, `Abyssal`) or Community.
-  - **🎯 Sonar Glob Simulator**: Type any file path (e.g., `src/mcp/server.ts`) to highlight all ADRs, patterns, and incidents whose `applies_to` globs govern that file in real time.
+  - Filter by Depth Zone (`Sunlight`, `Twilight`, `Abyssal`) or CoALA Category.
+  - **📡 Sonar Glob Simulator**: Type any file path (e.g., `src/mcp/server.ts`) to highlight all ADRs, patterns, and incidents whose `applies_to` globs govern that file in real time.
 - **Center Interactive D3.js Canvas**:
   - Force-directed topology with **Community Hulls**, **PageRank-scaled node radii**, **dashed gold halos for Bridge Nodes**, and **animated directional particles** flowing along directed edges.
   - **1-Hop / 2-Hop / Full Graph** focus toggle, **Back / Forward navigation history**, interactive **Breadcrumb trail**, and **🩺 Health Audit Modal**.

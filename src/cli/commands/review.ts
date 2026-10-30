@@ -38,15 +38,15 @@ export async function runReviewCommand(
       console.log(JSON.stringify(report, null, 2));
     } else {
       console.log(`\n🚨 [Bathynaut Review] Risk Level: ${report.risk_level} (Score: ${report.risk_score})`);
-      console.log(`   • Arquivos Alvo (${report.target_files.length}): ${report.target_files.join(', ') || 'nenhum'}`);
-      console.log(`   • Blast Radius (${report.affected_nodes.length} simbolos em ${report.affected_files.length} arquivos)`);
-      console.log(`   • Fluxos de Execucao Afetados: ${report.affected_flows.length}`);
-      console.log(`   • Testes de Cobertura (${report.covering_tests.length}): ${report.covering_tests.join(', ') || 'NENHUM'}`);
+      console.log(`   • Target Files (${report.target_files.length}): ${report.target_files.join(', ') || 'none'}`);
+      console.log(`   • Blast Radius (${report.affected_nodes.length} symbols across ${report.affected_files.length} files)`);
+      console.log(`   • Affected Execution Flows: ${report.affected_flows.length}`);
+      console.log(`   • Covering Tests (${report.covering_tests.length}): ${report.covering_tests.join(', ') || 'NONE'}`);
       if (report.untested_functions.length > 0) {
-        console.log(`   ⚠️ Funcoes sem Cobertura de Teste (${report.untested_functions.length}): ${report.untested_functions.map((u: any) => u.name).join(', ')}`);
+        console.log(`   ⚠️ Untested Functions (${report.untested_functions.length}): ${report.untested_functions.map((u: any) => u.name).join(', ')}`);
       }
       if (report.blocking_invariants.length > 0) {
-        console.log(`   🛑 Invariantes Obrigatorios Ativos:`);
+        console.log(`   🛑 Active Blocking Invariants:`);
         for (const inv of report.blocking_invariants) {
           console.log(`      - ${inv}`);
         }

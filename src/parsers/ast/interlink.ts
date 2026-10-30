@@ -65,7 +65,7 @@ export function interlinkCodeWithADRs(
           codeNode.id,
           adr.node.id,
           'EXTRACTED',
-          `Simbolo ancorado em frontmatter: ${codeNode.name}`
+          `Symbol anchored in frontmatter: ${codeNode.name}`
         );
         continue;
       }
@@ -86,7 +86,7 @@ export function interlinkCodeWithADRs(
             codeNode.id,
             adr.node.id,
             'INFERRED',
-            `Escopo correspondente: ${adr.appliesTo.join(', ')}`
+            `Matched scope glob: ${adr.appliesTo.join(', ')}`
           );
           continue;
         }
@@ -102,7 +102,7 @@ export function interlinkCodeWithADRs(
           codeNode.id,
           adr.node.id,
           'INFERRED',
-          `Mencionado inline no documento: \`${codeNode.name}\``
+          `Inline mention in document: \`${codeNode.name}\``
         );
       }
     }

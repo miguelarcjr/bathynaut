@@ -3,20 +3,20 @@ import path from 'node:path';
 import { MCPConfigFormat } from './detector.js';
 
 const CORE_PROTOCOL_LINES = [
-  '# Protocolo de Navegacao Oceanica Bathynaut (3-Phase Cognitive Harness)',
+  '# Bathynaut Oceanic Navigation Protocol (3-Phase Cognitive Harness)',
   '',
-  'Este projeto utiliza o **Bathynaut** como arquitetura cognitiva unificada (AST Call Graph + Topologia Louvain/PageRank + Zettelkasten CoALA).',
+  'This project uses **Bathynaut** as its unified cognitive architecture (AST Call Graph + Louvain/PageRank Topology + CoALA Zettelkasten Memory).',
   '',
-  '### Invariantes de Leitura e Execucao (3-Phase Protocol):',
-  '1. **Fase 1: Radar Pre-Edicao (Sonar)**: Antes de planejar ou editar qualquer arquivo de codigo, execute `bathynaut_sonar({ files: [...] })`.',
-  '   - Inspecione o blast radius de chamadas AST, os fluxos de execucao (`affected_flows`), o `risk_score` e os testes de cobertura downstream.',
-  '   - Respeite categoricamente todos os **`blocking_invariants`**, **ADRs ativas** e **incidentes conhecidos** retornados. Notas com `status: superseded` sao historicas e nunca devem ser replicadas.',
-  '2. **Fase 2: Exploracao e Descoberta**:',
-  '   - Para visao arquitetural macro (Comunidades, God Nodes, Bridge Nodes, `surprising_connections` e `knowledge_gaps`), use `bathynaut_dive({})`.',
-  '   - Para buscar decisoes, padroes ou ler notas especificas em lote por ID, use `bathynaut_recall({ query, ids, category })`.',
-  '3. **Fase 3: Persistencia Causal e Checkpoint**:',
-  '   - Toda nova decisao arquitetural, padrao ou incidente resolvido deve ser compilado via `bathynaut_log_adr` (nunca edite `.bathynaut/memory/wiki/` manualmente) usando arestas tipadas (`supersedes`, `mitigates`, `depends_on`, `implements`, `tensions_with`).',
-  '   - Ao concluir uma entrega significativa, execute `bathynaut_checkpoint` para salvar o estado quente em `activeContext.md`.'
+  '### Mandatory Agent Invariants (3-Phase Protocol):',
+  '1. **Phase 1: Pre-Edit Radar (Sonar)**: Before planning or editing any code file, call `bathynaut_sonar({ files: [...] })`.',
+  '   - Inspect the AST call blast radius, execution flows (`affected_flows`), `risk_score`, and downstream `covering_tests`.',
+  '   - Strictly obey all returned **`blocking_invariants`**, **active ADRs**, and **known incidents**. Notes with `status: superseded` are historical and must never be replicated.',
+  '2. **Phase 2: Exploration & Discovery**:',
+  '   - For macro architectural topology (Communities, God Nodes, Bridge Nodes, `surprising_connections`, and `knowledge_gaps`), call `bathynaut_dive({})`.',
+  '   - To search decisions/patterns or batch-read specific notes by ID, call `bathynaut_recall({ query, ids, category })`.',
+  '3. **Phase 3: Causal Persistence & Checkpoint**:',
+  '   - Every new architectural decision, reusable pattern, or resolved incident must be compiled via `bathynaut_log_adr` (never edit `.bathynaut/memory/wiki/` manually) using typed semantic edges (`supersedes`, `mitigates`, `depends_on`, `implements`, `tensions_with`).',
+  '   - At the end of any meaningful task, call `bathynaut_checkpoint` to persist the hot session state in `activeContext.md`.'
 ];
 
 function buildRulesBlock(filePath: string): string {
@@ -49,9 +49,9 @@ function buildRulesBlock(filePath: string): string {
       '<!-- BATHYNAUT:START -->',
       ...CORE_PROTOCOL_LINES,
       '',
-      '### Contexto Imediato da Sessao (Progressive Disclosure):',
-      '- Estado quente da sessao: @[Contexto Ativo](.bathynaut/memory/activeContext.md)',
-      '- Mapa de Conteudo (MOC): @[Indice da Wiki](.bathynaut/memory/index.md)',
+      '### Immediate Session Context (Progressive Disclosure):',
+      '- Active Session State: @[Active Session Context](.bathynaut/memory/activeContext.md)',
+      '- Map of Content (MOC): @[Wiki Index](.bathynaut/memory/index.md)',
       '<!-- BATHYNAUT:END -->'
     ].join('\n');
   }
@@ -62,9 +62,9 @@ function buildRulesBlock(filePath: string): string {
       '<!-- BATHYNAUT:START -->',
       ...CORE_PROTOCOL_LINES,
       '',
-      '### Contexto Imediato da Sessao:',
-      '- Estado quente da sessao: @[Contexto Ativo](.bathynaut/memory/activeContext.md)',
-      '- Mapa de Conteudo (MOC): @[Indice da Wiki](.bathynaut/memory/index.md)',
+      '### Immediate Session Context:',
+      '- Active Session State: @[Active Session Context](.bathynaut/memory/activeContext.md)',
+      '- Map of Content (MOC): @[Wiki Index](.bathynaut/memory/index.md)',
       '<!-- BATHYNAUT:END -->'
     ].join('\n');
   }
@@ -75,9 +75,9 @@ function buildRulesBlock(filePath: string): string {
       '<!-- BATHYNAUT:START -->',
       ...CORE_PROTOCOL_LINES,
       '',
-      '### Contexto Imediato da Sessao:',
-      '- Estado quente da sessao: @.bathynaut/memory/activeContext.md',
-      '- Mapa de Conteudo (MOC): @.bathynaut/memory/index.md',
+      '### Immediate Session Context:',
+      '- Active Session State: @.bathynaut/memory/activeContext.md',
+      '- Map of Content (MOC): @.bathynaut/memory/index.md',
       '<!-- BATHYNAUT:END -->'
     ].join('\n');
   }
@@ -111,7 +111,6 @@ export function injectRulesFile(filePath: string, projectRoot?: string): boolean
 
     const block = buildRulesBlock(filePath);
 
-    // Standalone dedicated files (.mdc or .agents/rules/bathynaut.md) are written directly
     const normalized = filePath.replace(/\\/g, '/');
     if (filePath.endsWith('.mdc') || normalized.endsWith('.agents/rules/bathynaut.md')) {
       backupFileIfExists(filePath, projectRoot);
@@ -289,7 +288,6 @@ export function injectAgentHooks(
     const preToolCmd = `${runner} hook-guard --event PreToolUse -d "${normalizedRoot}"`;
 
     if (agentName === 'cursor') {
-      // Cursor .cursor/hooks.json schema
       if (!config.version) config.version = 1;
       if (!config.hooks) config.hooks = {};
       const existingList: any[] = Array.isArray(config.hooks.beforeShellExecution)
@@ -301,7 +299,6 @@ export function injectAgentHooks(
       });
       config.hooks.beforeShellExecution = existingList;
     } else {
-      // Antigravity (.agents/hooks.json), Claude Code (.claude/settings.json), Gemini CLI (.gemini/settings.json)
       if (!config.hooks) config.hooks = {};
 
       const matcher =
@@ -311,7 +308,6 @@ export function injectAgentHooks(
             ? 'write_file|replace'
             : 'Edit|Write|MultiEdit';
 
-      // SessionStart
       const existingSession: any[] = Array.isArray(config.hooks.SessionStart)
         ? config.hooks.SessionStart.filter(
             (entry: any) => !entry?.hooks?.some((h: any) => String(h?.command || '').includes('hook-guard'))
@@ -323,7 +319,6 @@ export function injectAgentHooks(
       });
       config.hooks.SessionStart = existingSession;
 
-      // PreToolUse
       const existingPreTool: any[] = Array.isArray(config.hooks.PreToolUse)
         ? config.hooks.PreToolUse.filter(
             (entry: any) => !entry?.hooks?.some((h: any) => String(h?.command || '').includes('hook-guard'))

@@ -11,15 +11,15 @@ import { initDatabase, getDatabasePath } from '../../storage/db.js';
 import { NodeKind } from '../../types.js';
 
 export const RecallSchema = z.object({
-  query: z.string().optional().describe('Pergunta, simbolo ou conceito para buscar via Hybrid RRF (BM25 + PageRank + Backlinks)'),
-  ids: z.array(z.string()).optional().describe('Leitura direta em lote de notas/simbolos especificos pelo ID (paridade wiki_read_compiled)'),
-  category: z.enum(['decisions', 'incidents', 'patterns', 'entities', 'architecture']).optional().describe('Filtro opcional por categoria CoALA'),
-  include_superseded: z.boolean().default(true).describe('Incluir notas substituidas/depreciadas nos resultados'),
-  cross_repo: z.boolean().default(false).describe('Buscar federadamente em todos os repositorios registrados no Bathynaut'),
-  limit: z.number().default(10).describe('Numero maximo de resultados'),
-  token_budget: z.number().default(2000).describe('Orcamento maximo de tokens para os trechos retornados'),
-  project_path: z.string().optional().describe('Caminho opcional do repositorio'),
-  workspace_hint: z.string().optional().describe('Alias para project_path')
+  query: z.string().optional().describe('Question, symbol, or concept to search via Hybrid RRF (BM25 + PageRank + Backlinks)'),
+  ids: z.array(z.string()).optional().describe('Direct batch read of specific notes/symbols by ID (wiki_read_compiled parity)'),
+  category: z.enum(['decisions', 'incidents', 'patterns', 'entities', 'architecture']).optional().describe('Optional CoALA category filter'),
+  include_superseded: z.boolean().default(true).describe('Include superseded/deprecated notes in results'),
+  cross_repo: z.boolean().default(false).describe('Federated search across all repositories registered in Bathynaut'),
+  limit: z.number().default(10).describe('Maximum number of results'),
+  token_budget: z.number().default(2000).describe('Maximum token budget for returned excerpts'),
+  project_path: z.string().optional().describe('Optional repository path'),
+  workspace_hint: z.string().optional().describe('Alias for project_path')
 });
 
 const CATEGORY_TO_KIND: Record<string, NodeKind> = {
@@ -63,10 +63,10 @@ function enrichSingleNode(db: Database, nodeId: string): RRFSearchResultItem | n
   const supersededByEdge = backlinks.find(b => b.inverse_relation === 'superseded_by');
   if (node.status === 'superseded' || supersededByEdge) {
     deprecation_warning = supersededByEdge
-      ? `ATENCAO: Esta nota tem status 'superseded' e foi substituida por [[${supersededByEdge.source_id}]] (${supersededByEdge.source_name}).`
-      : `ATENCAO: Esta nota tem status 'superseded' (arquitetura legada).`;
+      ? `WARNING: This note has status 'superseded' and was replaced by [[${supersededByEdge.source_id}]] (${supersededByEdge.source_name}).`
+      : `WARNING: This note has status 'superseded' (legacy architecture).`;
   } else if (node.status === 'stale') {
-    deprecation_warning = `ATENCAO: Esta nota esta marcada como 'stale' (o codigo governado sofreu alteracoes).`;
+    deprecation_warning = `WARNING: This note is marked 'stale' (the governed code has been modified).`;
   }
 
   const citation = node.file_path

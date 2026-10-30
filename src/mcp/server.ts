@@ -34,102 +34,112 @@ export function createMCPServer(
       tools: [
         {
           name: 'bathynaut_sonar',
-          description: 'Radar Acustico Pre-Edicao v0.2 SOTA: Retorna blast radius de chamadas AST, fluxos de execucao, risk score, testes de cobertura, blocking invariants e ADRs/incidentes em 1 chamada com empacotamento por token_budget.',
+          description: 'Pre-Edit Acoustic Radar v0.2 SOTA: Returns AST call blast radius, execution flows, risk score, test coverage, blocking invariants, and governing ADRs/incidents in 1 call within token_budget.',
           inputSchema: {
             type: 'object',
             properties: {
-              files: { type: 'array', items: { type: 'string' }, description: 'Arquivos a serem modificados' },
-              git_diff: { type: 'string', description: 'Ref Git opcional (ex: "HEAD", "main") para detectar mudancas automaticamente' },
-              token_budget: { type: 'number', default: 2500, description: 'Orcamento maximo de tokens' },
-              project_path: { type: 'string', description: 'Caminho opcional do repositorio (multi-project routing)' }
+              files: { type: 'array', items: { type: 'string' }, description: 'Target files to be modified or analyzed' },
+              git_diff: { type: 'string', description: 'Optional Git ref (e.g., "HEAD", "main") to detect changed lines automatically' },
+              token_budget: { type: 'number', default: 2500, description: 'Maximum token budget for returned excerpts' },
+              project_path: { type: 'string', description: 'Optional repository path (for multi-project routing)' }
             }
           }
         },
         {
           name: 'bathynaut_dive',
-          description: 'Visao Macro Topologica v0.2: Explora comunidades funcionais (com metrica de coesao), God Nodes, Bridge Nodes e Execution Flows criticos.',
+          description: 'Macro Topological View v0.2: Explores functional Louvain communities (with cohesion score), God Nodes, Bridge Nodes, critical Execution Flows, surprising_connections, and knowledge_gaps.',
           inputSchema: {
             type: 'object',
             properties: {
-              community_id: { type: 'number', description: 'ID da comunidade opcional' },
-              query: { type: 'string', description: 'Busca textual de modulo' },
-              project_path: { type: 'string', description: 'Caminho opcional do repositorio' }
+              community_id: { type: 'number', description: 'Optional community ID to inspect' },
+              query: { type: 'string', description: 'Optional search query for subsystems' },
+              rename_symbol: { type: 'string', description: 'Optional symbol name/ID to preview cross-file rename impact' },
+              new_name: { type: 'string', description: 'Desired new name for rename_symbol preview' },
+              project_path: { type: 'string', description: 'Optional repository path' }
             }
           }
         },
         {
           name: 'bathynaut_path',
-          description: 'Rastreamento Acustico de Caminho: Encontra o menor caminho direcionado conectando dois componentes ou funcoes com relacoes e confianca.',
+          description: 'Acoustic Pathfinding: Finds the shortest directed/bidirectional path connecting two components, functions, or Zettelkasten notes with edge relations and confidence tiers.',
           inputSchema: {
             type: 'object',
             properties: {
-              from: { type: 'string', description: 'Origem (ID ou nome do simbolo)' },
-              to: { type: 'string', description: 'Destino (ID ou nome do simbolo)' },
-              project_path: { type: 'string', description: 'Caminho opcional do repositorio' }
+              from: { type: 'string', description: 'Source node ID or symbol name' },
+              to: { type: 'string', description: 'Target node ID or symbol name' },
+              project_path: { type: 'string', description: 'Optional repository path' }
             },
             required: ['from', 'to']
           }
         },
         {
           name: 'bathynaut_recall',
-          description: 'Memoria Causal Hybrid RRF (FTS5 BM25 + Tokenizacao de Identificadores + PageRank + Backlinks 1-Hop): Busca em decisoes (ADRs), incidentes, padroes, entidades, arquitetura e codigo.',
+          description: 'Hybrid RRF Causal Memory (FTS5 BM25 + Identifier Splitting + PageRank + 1-Hop Backlinks): Searches across decisions (ADRs), incidents, patterns, entities, architecture, and code, or batch-reads by IDs.',
           inputSchema: {
             type: 'object',
             properties: {
-              query: { type: 'string', description: 'Termo, simbolo ou pergunta de busca' },
+              query: { type: 'string', description: 'Search query, symbol, or natural language question' },
+              ids: { type: 'array', items: { type: 'string' }, description: 'Direct batch read of specific note/symbol IDs' },
+              category: { type: 'string', enum: ['decisions', 'incidents', 'patterns', 'entities', 'architecture'], description: 'Optional CoALA category filter' },
+              include_superseded: { type: 'boolean', default: true, description: 'Include superseded/deprecated notes in results' },
+              cross_repo: { type: 'boolean', default: false, description: 'Federated search across all registered Bathynaut repositories' },
               limit: { type: 'number', default: 10 },
               token_budget: { type: 'number', default: 2000 },
-              project_path: { type: 'string', description: 'Caminho opcional do repositorio' }
-            },
-            required: ['query']
+              project_path: { type: 'string', description: 'Optional repository path' }
+            }
           }
         },
         {
           name: 'bathynaut_log_adr',
-          description: 'Persistencia Cognitiva CoALA + Auto-Interlinking Imediato: Registra uma nota atomica (decisions, incidents, patterns, entities, architecture) com enforcement, invariantes e simbolos.',
+          description: 'CoALA Cognitive Persistence + Immediate Auto-Interlinking: Compiles an atomic note (decisions, incidents, patterns, entities, architecture) with enforcement, invariants, symbols, sources, and typed edges.',
           inputSchema: {
             type: 'object',
             properties: {
-              title: { type: 'string', description: 'Titulo da nota/decisao' },
+              id: { type: 'string', description: 'Optional declarative kebab-case ID (e.g., adr-001-auth-jwt)' },
+              title: { type: 'string', description: 'Note or decision title' },
+              summary: { type: 'string', description: 'Short summary (up to 180 chars) for index.md' },
               category: { type: 'string', enum: ['decisions', 'incidents', 'patterns', 'entities', 'architecture'], default: 'decisions' },
-              context: { type: 'string', description: 'Contexto e motivacao' },
-              decision: { type: 'string', description: 'Decisao tomada ou especificacao' },
+              context: { type: 'string', description: 'Context and motivation' },
+              decision: { type: 'string', description: 'Decision taken or technical specification' },
+              body_markdown: { type: 'string', description: 'Optional full Markdown body (alternative to context + decision)' },
               enforcement: { type: 'string', enum: ['blocking', 'warning', 'advisory'], default: 'advisory' },
-              invariants: { type: 'array', items: { type: 'string' }, description: 'Lista de invariantes verificaveis' },
-              applies_to: { type: 'array', items: { type: 'string' }, description: 'Globs de escopo de arquivos' },
-              symbols: { type: 'array', items: { type: 'string' }, description: 'Simbolos de codigo ancorados' },
-              supersedes: { type: 'string', description: 'ID da ADR substituida' },
-              mitigates: { type: 'string', description: 'ID do incidente mitigado' },
-              caused_by: { type: 'string', description: 'ID da causa raiz' },
-              depends_on: { type: 'string', description: 'ID de dependencia' },
-              implements: { type: 'string', description: 'ID de padrao/arquitetura implementado' },
-              tensions_with: { type: 'string', description: 'ID de nota com tensao/trade-off' },
-              verified_by: { type: 'string', description: 'ID de teste verificador' },
-              project_path: { type: 'string', description: 'Caminho opcional do repositorio' }
+              invariants: { type: 'array', items: { type: 'string' }, description: 'List of verifiable invariants' },
+              applies_to: { type: 'array', items: { type: 'string' }, description: 'File scope glob patterns' },
+              symbols: { type: 'array', items: { type: 'string' }, description: 'Explicitly anchored code symbols' },
+              sources: { type: 'array', items: { type: 'string' }, description: 'Raw source files in raw/ compiled by this note' },
+              edges: { type: 'object', description: 'Typed semantic edge arrays (supersedes, mitigates, caused_by, depends_on, implements, tensions_with, verified_by)' },
+              supersedes: { type: 'string', description: 'ID of superseded ADR' },
+              mitigates: { type: 'string', description: 'ID of mitigated incident' },
+              caused_by: { type: 'string', description: 'ID of root cause' },
+              depends_on: { type: 'string', description: 'ID of dependency' },
+              implements: { type: 'string', description: 'ID of implemented pattern/architecture' },
+              tensions_with: { type: 'string', description: 'ID of note with architectural tension/trade-off' },
+              verified_by: { type: 'string', description: 'ID of verifying test suite' },
+              project_path: { type: 'string', description: 'Optional repository path' }
             },
-            required: ['title', 'context', 'decision']
+            required: ['title']
           }
         },
         {
           name: 'bathynaut_checkpoint',
-          description: 'Memoria Episodica de Sessao: Congela o estado mental quente da sessao em activeContext.md.',
+          description: 'Episodic Session Memory: Freezes the hot working state of the current session in activeContext.md.',
           inputSchema: {
             type: 'object',
             properties: {
-              summary: { type: 'string', description: 'Resumo do turno' },
-              active_tasks: { type: 'array', items: { type: 'string' }, description: 'Proximas tarefas' },
-              decisions: { type: 'array', items: { type: 'string' }, description: 'Decisoes tomadas' }
+              summary: { type: 'string', description: 'Summary of session progress' },
+              active_tasks: { type: 'array', items: { type: 'string' }, description: 'Next active tasks' },
+              decisions: { type: 'array', items: { type: 'string' }, description: 'Decisions made during the turn' }
             },
             required: ['summary', 'active_tasks']
           }
         },
         {
           name: 'bathynaut_lint',
-          description: 'Auditoria 5D de Saude do Grafo: Detecta nos orfaos, arestas quebradas, Stale ADRs (codigo alterado), God Nodes sem testes e arquivos brutos pendentes em raw/.',
+          description: '5D Graph Health Audit: Detects orphan nodes, broken edges, Stale ADRs (governed code modified), untested God Nodes, and uncompiled raw files in raw/.',
           inputSchema: {
             type: 'object',
             properties: {
-              project_path: { type: 'string', description: 'Caminho opcional do repositorio' }
+              project_path: { type: 'string', description: 'Optional repository path' }
             }
           }
         }
@@ -181,7 +191,7 @@ export function createMCPServer(
         LintSchema.parse(args);
         return handleLint(activeDb, activeMemoryRoot);
       default:
-        throw new Error(`Ferramenta desconhecida: ${name}`);
+        throw new Error(`Unknown tool: ${name}`);
     }
   });
 

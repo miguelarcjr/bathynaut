@@ -3,9 +3,9 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 export const CheckpointSchema = z.object({
-  summary: z.string().describe('Resumo executivo do progresso alcancado no turno'),
-  active_tasks: z.array(z.string()).describe('Lista de proximas tarefas imediatas'),
-  decisions: z.array(z.string()).default([]).describe('Decisoes tomadas durante o turno')
+  summary: z.string().describe('Executive summary of progress achieved during the session'),
+  active_tasks: z.array(z.string()).describe('List of immediate next tasks'),
+  decisions: z.array(z.string()).default([]).describe('Decisions made during the turn')
 });
 
 export function handleCheckpoint(memoryRoot: string, args: z.infer<typeof CheckpointSchema>) {
@@ -17,17 +17,17 @@ export function handleCheckpoint(memoryRoot: string, args: z.infer<typeof Checkp
   const decisions = args.decisions || [];
   const activeTasks = args.active_tasks || [];
 
-  const content = `# Estado Ativo da Sessao (Checkpoint)
-> Ultima atualizacao: ${new Date().toISOString()}
+  const content = `# Active Session State (Checkpoint)
+> Last updated: ${new Date().toISOString()}
 
-## Resumo do Progresso
+## Progress Summary
 ${args.summary}
 
-## Proximas Tarefas Ativas
+## Next Active Tasks
 ${activeTasks.map(t => `- [ ] ${t}`).join('\n')}
 
-## Decisoes Recentes do Turno
-${decisions.length > 0 ? decisions.map(d => `- ${d}`).join('\n') : '_Nenhuma decisao adicional registrada._'}
+## Recent Turn Decisions
+${decisions.length > 0 ? decisions.map(d => `- ${d}`).join('\n') : '_No additional decisions recorded._'}
 `;
 
   fs.writeFileSync(activeContextPath, content, 'utf-8');

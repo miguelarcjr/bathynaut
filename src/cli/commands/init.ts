@@ -7,19 +7,19 @@ import { runHooksCommand } from './hooks.js';
 import { runMapCommand } from './map.js';
 
 export async function runInitCommand(projectRoot: string): Promise<void> {
-  console.log('🌊 [Bathynaut] Inicializando Cognitive Architecture & Memory Harness v0.2 SOTA...');
+  console.log('🌊 [Bathynaut] Initializing Cognitive Architecture & Memory Harness v0.2 SOTA...');
 
   // 1. Scaffold Memory Vault & Multi-Agent Cognitive Skills (.agents/skills, .claude/skills, .cursor/skills)
   const memoryDir = scaffoldMemoryVault(projectRoot);
   scaffoldCognitiveSkills(projectRoot);
-  console.log(`🗄️ Cofre Zettelkasten inicializado em: ${memoryDir}`);
+  console.log(`🗄️ CoALA Zettelkasten vault initialized at: ${memoryDir}`);
 
   // 2. Detect Agents and Inject Rules, MCP Configs & Lifecycle Hooks (with safe backups in .bathynaut/backups)
   const agents = detectInstalledAgents(projectRoot);
   const binPath = path.resolve('dist/cli/main.js');
 
   for (const ag of agents) {
-    console.log(`🤖 Configurando harness do agente: ${ag.name}`);
+    console.log(`🤖 Configuring agent harness: ${ag.name}`);
     if (ag.rulesPath) {
       injectRulesFile(ag.rulesPath, projectRoot);
     }
@@ -47,6 +47,6 @@ export async function runInitCommand(projectRoot: string): Promise<void> {
   // 4. Initial Map
   await runMapCommand(projectRoot);
 
-  console.log('\n🎉 Bathynaut inicializado com sucesso em 1 comando!');
-  console.log('Abra o seu editor (Antigravity, Claude Code, Cursor, Windsurf, Copilot ou OpenCode) e comece a pair-programar com sonar profundo.');
+  console.log('\n🎉 Bathynaut initialized successfully in 1 command!');
+  console.log('Open your editor (Antigravity, Claude Code, Cursor, Windsurf, Copilot, or OpenCode) and start pair-programming with deep sonar.');
 }

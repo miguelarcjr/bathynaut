@@ -5,12 +5,12 @@ import { getGitDiffRanges } from '../../graph/git-diff.js';
 import { packWithinTokenBudget, PackableExcerptItem } from '../../storage/token-packer.js';
 
 export const SonarSchema = z.object({
-  files: z.array(z.string()).default([]).describe('Lista de caminhos de arquivos que serao editados ou analisados'),
-  file_paths: z.array(z.string()).optional().describe('Alias para files (compatibilidade com wiki_context_for_files)'),
-  git_diff: z.string().optional().describe('Ref Git opcional (ex: "HEAD", "main") para extrair arquivos e linhas alteradas automaticamente'),
-  token_budget: z.number().default(2500).describe('Orcamento maximo de tokens para os trechos de codigo e ADRs retornados'),
-  project_path: z.string().optional().describe('Caminho opcional do repositorio (para roteamento multi-projeto)'),
-  workspace_hint: z.string().optional().describe('Alias para project_path')
+  files: z.array(z.string()).default([]).describe('List of file paths to be edited or analyzed'),
+  file_paths: z.array(z.string()).optional().describe('Alias for files (wiki_context_for_files compatibility)'),
+  git_diff: z.string().optional().describe('Optional Git ref (e.g., "HEAD", "main") to extract modified files and line ranges automatically'),
+  token_budget: z.number().default(2500).describe('Maximum token budget for returned code and ADR excerpts'),
+  project_path: z.string().optional().describe('Optional repository path (for multi-project routing)'),
+  workspace_hint: z.string().optional().describe('Alias for project_path')
 });
 
 export function handleSonar(
@@ -38,7 +38,7 @@ export function handleSonar(
       title: `[ADR:${adr.enforcement.toUpperCase()}] ${adr.title}`,
       citation: adr.id,
       snippet: adr.invariants.length > 0
-        ? `${adr.summary}\nInvariantes:\n- ${adr.invariants.join('\n- ')}`
+        ? `${adr.summary}\nInvariants:\n- ${adr.invariants.join('\n- ')}`
         : adr.summary,
       priority
     });

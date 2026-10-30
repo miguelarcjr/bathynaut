@@ -4,9 +4,9 @@ import { buildGraphFromDatabase } from '../../graph/builder.js';
 import shortestPath from 'graphology-shortest-path';
 
 export const PathSchema = z.object({
-  from: z.string().describe('ID do no ou nome do simbolo de origem'),
-  to: z.string().describe('ID do no ou nome do simbolo de destino'),
-  project_path: z.string().optional().describe('Caminho opcional do repositorio')
+  from: z.string().describe('Source node ID or symbol name'),
+  to: z.string().describe('Target node ID or symbol name'),
+  project_path: z.string().optional().describe('Optional repository path')
 });
 
 export function handlePath(db: Database, args: z.infer<typeof PathSchema>) {
@@ -30,7 +30,7 @@ export function handlePath(db: Database, args: z.infer<typeof PathSchema>) {
       content: [
         {
           type: 'text',
-          text: JSON.stringify({ error: 'Nao foi possivel encontrar um dos nos no grafo', fromId, toId })
+          text: JSON.stringify({ error: 'Could not locate one or both nodes in the graph', fromId, toId })
         }
       ]
     };
@@ -69,7 +69,7 @@ export function handlePath(db: Database, args: z.infer<typeof PathSchema>) {
             from: fromId,
             to: toId,
             hops: path ? path.length - 1 : 0,
-            path: path || 'Sem conexao direta',
+            path: path || 'No direct connection found',
             edges
           },
           null,

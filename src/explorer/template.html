@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -311,11 +311,11 @@
       <span class="brand-tag">v0.3 SOTA • 3-Zone Debugger</span>
     </div>
     <div class="center-controls">
-      <button class="nav-btn" id="btn-back" disabled title="Voltar">&larr;</button>
-      <button class="nav-btn" id="btn-fwd" disabled title="Avancar">&rarr;</button>
-      <input type="text" id="search-box" placeholder="Buscar funcao, classe, ADR ou invariante (BM25 / Simbolo)...">
-      <select id="hop-mode" class="hop-select" title="Raio de vizinhanca">
-        <option value="all">Grafo Completo</option>
+      <button class="nav-btn" id="btn-back" disabled title="Back">&larr;</button>
+      <button class="nav-btn" id="btn-fwd" disabled title="Forward">&rarr;</button>
+      <input type="text" id="search-box" placeholder="Search function, class, ADR, or invariant (BM25 / Symbol)...">
+      <select id="hop-mode" class="hop-select" title="Neighborhood radius">
+        <option value="all">Full Graph</option>
         <option value="1">1-Hop Ego</option>
         <option value="2">2-Hop Blast</option>
       </select>
@@ -326,12 +326,12 @@
   </header>
 
   <div id="breadcrumb-bar">
-    <div id="breadcrumbs"><span>Trilha de Navegacao: clique em um no para inspecionar</span></div>
+    <div id="breadcrumbs"><span>Navigation Trail: click any node to inspect</span></div>
     <div>
-      <span id="node-count">0</span> nos •
-      <span id="edge-count">0</span> arestas •
-      <span id="comm-count">0</span> comunidades •
-      <span id="flow-count">0</span> fluxos
+      <span id="node-count">0</span> nodes •
+      <span id="edge-count">0</span> edges •
+      <span id="comm-count">0</span> communities •
+      <span id="flow-count">0</span> flows
     </div>
   </div>
 
@@ -339,13 +339,13 @@
     <!-- Left Sidebar -->
     <aside id="left-sidebar">
       <div class="sidebar-section">
-        <div class="sidebar-title">📡 Simulador Sonar (Glob / Arquivo)</div>
-        <input type="text" id="sonar-glob-input" placeholder="Ex: src/auth.ts ou src/storage/*">
+        <div class="sidebar-title">📡 Sonar Simulator (Glob / File)</div>
+        <input type="text" id="sonar-glob-input" placeholder="e.g., src/auth.ts or src/storage/*">
       </div>
       <div class="sidebar-section">
-        <div class="sidebar-title">🧭 Zonas & Categorias CoALA</div>
+        <div class="sidebar-title">🧭 Zones & CoALA Categories</div>
         <div class="filter-chips" id="kind-filters">
-          <span class="chip active" data-filter="all">Todos</span>
+          <span class="chip active" data-filter="all">All</span>
           <span class="chip" data-filter="adr">ADRs</span>
           <span class="chip" data-filter="incident">Incidents</span>
           <span class="chip" data-filter="pattern">Patterns</span>
@@ -356,7 +356,7 @@
         </div>
       </div>
       <div class="sidebar-section" style="padding-bottom:6px; border-bottom:none;">
-        <div class="sidebar-title">🗂️ Explorador de Nos (PageRank)</div>
+        <div class="sidebar-title">🗂️ Node Explorer (PageRank)</div>
       </div>
       <div id="node-tree"></div>
     </aside>
@@ -370,8 +370,8 @@
     <aside id="right-panel">
       <div id="panel-content">
         <div style="color: var(--text-muted); font-size: 0.85rem; line-height: 1.5;">
-          <h3 style="color: var(--text-main); margin-bottom: 8px;">Inspecao Oceanica SOTA</h3>
-          Selecione qualquer simbolo AST (Twilight), comunidade (Sunlight) ou nota Zettelkasten (Abyssal) no grafo ou na lista lateral para inspecionar assinaturas, invariantes, backlinks bidirecionais e codigo-fonte.
+          <h3 style="color: var(--text-main); margin-bottom: 8px;">SOTA Oceanic Inspector</h3>
+          Select any AST symbol (Twilight), community (Sunlight), or Zettelkasten note (Abyssal) in the graph or sidebar to inspect signatures, invariants, bidirectional backlinks, and source code.
         </div>
       </div>
     </aside>
@@ -381,7 +381,7 @@
   <div id="health-modal">
     <div class="modal-box">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-        <h3>🩺 Auditoria 5D do Grafo (bathynaut_lint)</h3>
+        <h3>🩺 5D Graph Health Audit (bathynaut_lint)</h3>
         <button class="nav-btn" id="close-health">&times;</button>
       </div>
       <div id="health-body" style="font-size:0.82rem; line-height:1.6;"></div>
@@ -427,9 +427,9 @@
     const g = svg.append("g");
 
     // Depth Zone horizontal guide labels
-    g.append("text").attr("class", "zone-label").attr("x", 24).attr("y", height * 0.18).text("☀️ SUNLIGHT ZONE • TOPOLOGIA & ENTRYPOINTS");
-    g.append("text").attr("class", "zone-label").attr("x", 24).attr("y", height * 0.48).text("🌗 TWILIGHT ZONE • AST CALL GRAPH & SIMBOLOS");
-    g.append("text").attr("class", "zone-label").attr("x", 24).attr("y", height * 0.80).text("🌑 ABYSSAL ZONE • MEMORIA COALA ZETTELKASTEN (ADRs & INCIDENTS)");
+    g.append("text").attr("class", "zone-label").attr("x", 24).attr("y", height * 0.18).text("☀️ SUNLIGHT ZONE • TOPOLOGY & ENTRYPOINTS");
+    g.append("text").attr("class", "zone-label").attr("x", 24).attr("y", height * 0.48).text("🌗 TWILIGHT ZONE • AST CALL GRAPH & SYMBOLS");
+    g.append("text").attr("class", "zone-label").attr("x", 24).attr("y", height * 0.80).text("🌑 ABYSSAL ZONE • COALA ZETTELKASTEN MEMORY (ADRs & INCIDENTS)");
 
     svg.call(d3.zoom()
       .extent([[0, 0], [width, height]])
@@ -578,7 +578,7 @@
         if (invs.length > 0) {
           invariantsHtml = `
             <div style="background: rgba(244,63,94,0.1); border: 1px solid rgba(244,63,94,0.35); padding: 10px; border-radius: 8px; margin-bottom: 12px;">
-              <div style="font-size: 0.72rem; font-weight:700; color:#fda4af; text-transform:uppercase; margin-bottom:4px;">🛑 Invariantes (${d.enforcement || 'advisory'})</div>
+              <div style="font-size: 0.72rem; font-weight:700; color:#fda4af; text-transform:uppercase; margin-bottom:4px;">🛑 Invariants (${d.enforcement || 'advisory'})</div>
               <ul style="padding-left:16px; font-size:0.78rem; color:#fecdd3;">
                 ${invs.map(i => `<li>${i}</li>`).join('')}
               </ul>
@@ -614,12 +614,12 @@
         </div>
         <h2 style="font-size: 1.15rem; margin-bottom: 6px; word-break:break-all;">${d.name}</h2>
         ${d.signature ? `<code style="display:block; background:#070b14; padding:7px 9px; border-radius:6px; font-size:0.74rem; color:#38bdf8; margin-bottom:10px; border:1px solid var(--border-panel);">${d.signature}</code>` : ''}
-        <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 10px;">${d.summary || 'Sem resumo.'}</p>
+        <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 10px;">${d.summary || 'No summary.'}</p>
         ${d.file_path ? `<div style="font-size: 0.74rem; font-family:monospace; color: #94a3b8; margin-bottom: 12px;">📄 ${d.file_path}${d.line_start ? `:${d.line_start}-${d.line_end || d.line_start}` : ''}</div>` : ''}
         ${invariantsHtml}
-        ${outgoing.length > 0 ? `<div class="sidebar-title">Arestas de Saida (${outgoing.length})</div><div style="margin-bottom:12px;">${outHtml}</div>` : ''}
+        ${outgoing.length > 0 ? `<div class="sidebar-title">Outgoing Edges (${outgoing.length})</div><div style="margin-bottom:12px;">${outHtml}</div>` : ''}
         ${incoming.length > 0 ? `<div class="sidebar-title">Backlinks / Callers (${incoming.length})</div><div style="margin-bottom:12px;">${inHtml}</div>` : ''}
-        ${excerpt ? `<div class="sidebar-title">Conteudo / Codigo</div><div style="background:#070b14; border:1px solid var(--border-panel); padding:10px; border-radius:8px; font-size:0.76rem; white-space:pre-wrap; font-family:monospace; max-height:320px; overflow-y:auto;">${excerpt}</div>` : ''}
+        ${excerpt ? `<div class="sidebar-title">Content / Source Code</div><div style="background:#070b14; border:1px solid var(--border-panel); padding:10px; border-radius:8px; font-size:0.76rem; white-space:pre-wrap; font-family:monospace; max-height:320px; overflow-y:auto;">${excerpt}</div>` : ''}
       `;
     }
 
@@ -721,13 +721,13 @@
       const adrsCount = DATA.nodes.filter(n => n.depth_zone === 'abyssal').length;
       const bridgeCount = DATA.nodes.filter(n => n.is_bridge === 1).length;
       document.getElementById('health-body').innerHTML = `
-        <p>• <strong>Total de Nos Indexados:</strong> ${DATA.nodes.length}</p>
-        <p>• <strong>Total de Arestas Resolvidas:</strong> ${DATA.edges.length}</p>
-        <p>• <strong>Notas CoALA Zettelkasten (Abyssal):</strong> ${adrsCount}</p>
-        <p>• <strong>Bridge Nodes (Pontes entre Subsistemas):</strong> ${bridgeCount}</p>
-        <p>• <strong>Comunidades Louvain Detectadas:</strong> ${communities.length}</p>
-        <p>• <strong>Execution Flows Rastreados:</strong> ${flows.length}</p>
-        <p>• <strong>Arestas Stale (needs_review = 1):</strong> ${staleCount}</p>
+        <p>• <strong>Total Indexed Nodes:</strong> ${DATA.nodes.length}</p>
+        <p>• <strong>Total Resolved Edges:</strong> ${DATA.edges.length}</p>
+        <p>• <strong>CoALA Zettelkasten Notes (Abyssal):</strong> ${adrsCount}</p>
+        <p>• <strong>Bridge Nodes (Subsystem Connectors):</strong> ${bridgeCount}</p>
+        <p>• <strong>Louvain Communities Detected:</strong> ${communities.length}</p>
+        <p>• <strong>Traced Execution Flows:</strong> ${flows.length}</p>
+        <p>• <strong>Stale Edges (needs_review = 1):</strong> ${staleCount}</p>
       `;
       document.getElementById('health-modal').classList.add('open');
     };

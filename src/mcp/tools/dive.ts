@@ -8,12 +8,12 @@ import {
 } from '../../graph/insights.js';
 
 export const DiveSchema = z.object({
-  community_id: z.number().optional().describe('ID da comunidade topologica para inspecionar'),
-  query: z.string().optional().describe('Termo de busca para encontrar subsistemas'),
-  rename_symbol: z.string().optional().describe('Nome ou ID do simbolo para simular refatoracao/rename cross-file'),
-  new_name: z.string().optional().describe('Novo nome desejado para o simbolo em rename_symbol'),
-  project_path: z.string().optional().describe('Caminho opcional do repositorio'),
-  workspace_hint: z.string().optional().describe('Alias para project_path')
+  community_id: z.number().optional().describe('Topological community ID to inspect'),
+  query: z.string().optional().describe('Search query to find subsystems'),
+  rename_symbol: z.string().optional().describe('Symbol name or ID to preview cross-file rename impact'),
+  new_name: z.string().optional().describe('Desired new name for rename_symbol preview'),
+  project_path: z.string().optional().describe('Optional repository path'),
+  workspace_hint: z.string().optional().describe('Alias for project_path')
 });
 
 export function handleDive(db: Database, args: z.infer<typeof DiveSchema>) {

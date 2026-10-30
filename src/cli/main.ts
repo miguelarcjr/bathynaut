@@ -21,28 +21,28 @@ program
 
 program
   .command('init')
-  .description('Inicializa o cofre Zettelkasten CoALA, injeta regras/MCP/hooks/skills nos agentes detectados e mapeia o projeto')
-  .option('-d, --dir <path>', 'Diretorio raiz do projeto', process.cwd())
+  .description('Initialize the CoALA Zettelkasten vault, inject rules/MCP/hooks/skills across detected agents, and map the project')
+  .option('-d, --dir <path>', 'Project root directory', process.cwd())
   .action(async (opts) => {
     await runInitCommand(path.resolve(opts.dir));
   });
 
 program
   .command('map')
-  .description('Sincroniza incrementalmente AST + Zettelkasten, calcula comunidades, PageRank, fluxos e gera bathynaut.html')
-  .option('-d, --dir <path>', 'Diretorio raiz do projeto', process.cwd())
-  .option('-f, --force', 'Forcar reindexacao completa de todos os arquivos', false)
+  .description('Incrementally sync AST + Zettelkasten, compute Louvain communities, PageRank, flows, and export bathynaut.html')
+  .option('-d, --dir <path>', 'Project root directory', process.cwd())
+  .option('-f, --force', 'Force full re-index of all files', false)
   .action(async (opts) => {
     await runMapCommand(path.resolve(opts.dir), { force: opts.force });
   });
 
 program
   .command('review [files...]')
-  .description('Audita impacto pre-commit ou pre-PR (Blast Radius, Risk Score, Blocking Invariants e Cobertura de Testes)')
-  .option('-d, --dir <path>', 'Diretorio raiz do projeto', process.cwd())
-  .option('-b, --base <ref>', 'Ref Git base para diff (ex: HEAD, main)', 'HEAD')
-  .option('-t, --token-budget <tokens>', 'Orcamento maximo de tokens', '2500')
-  .option('--json', 'Exibir saida em JSON puro', false)
+  .description('Audit pre-commit or pre-PR impact (Blast Radius, Risk Score, Blocking Invariants, and Test Coverage)')
+  .option('-d, --dir <path>', 'Project root directory', process.cwd())
+  .option('-b, --base <ref>', 'Base Git ref for diff (e.g., HEAD, main)', 'HEAD')
+  .option('-t, --token-budget <tokens>', 'Maximum token budget', '2500')
+  .option('--json', 'Output raw JSON report', false)
   .action(async (files, opts) => {
     await runReviewCommand(path.resolve(opts.dir), files, {
       baseRef: opts.base,
@@ -53,8 +53,8 @@ program
 
 program
   .command('serve')
-  .description('Inicia o servidor MCP Bathynaut via stdio com suporte a roteamento multi-projeto e sync JIT')
-  .option('-d, --dir <path>', 'Diretorio raiz do projeto', process.cwd())
+  .description('Start the Bathynaut MCP server over stdio with multi-project routing and JIT incremental sync')
+  .option('-d, --dir <path>', 'Project root directory', process.cwd())
   .action(async (opts) => {
     const projectRoot = path.resolve(opts.dir);
     const dbPath = getDatabasePath(projectRoot);
@@ -65,8 +65,8 @@ program
 
 program
   .command('explore')
-  .description('Exporta e abre o explorador visual interativo bathynaut.html no navegador')
-  .option('-d, --dir <path>', 'Diretorio raiz do projeto', process.cwd())
+  .description('Export and open the interactive bathynaut.html visual explorer in your browser')
+  .option('-d, --dir <path>', 'Project root directory', process.cwd())
   .action((opts) => {
     const projectRoot = path.resolve(opts.dir);
     const dbPath = getDatabasePath(projectRoot);
@@ -74,7 +74,7 @@ program
     const htmlPath = path.join(projectRoot, '.bathynaut', 'bathynaut.html');
     exportExplorerHTML(db, htmlPath);
     db.close();
-    console.log(`🌐 Abrindo Ocean Canvas Explorer: ${htmlPath}`);
+    console.log(`🌐 Opening Ocean Canvas Explorer: ${htmlPath}`);
 
     const platform = process.platform;
     if (platform === 'win32') {
@@ -88,8 +88,8 @@ program
 
 program
   .command('doctor')
-  .description('Executa auditoria 5D de saude do grafo (orfaos, arestas quebradas, Stale ADRs, God Nodes sem teste, raw/)')
-  .option('-d, --dir <path>', 'Diretorio raiz do projeto', process.cwd())
+  .description('Run the 5D graph health audit (orphans, broken edges, Stale ADRs, untested God Nodes, pending raw/)')
+  .option('-d, --dir <path>', 'Project root directory', process.cwd())
   .action((opts) => {
     const projectRoot = path.resolve(opts.dir);
     const dbPath = getDatabasePath(projectRoot);
@@ -102,25 +102,25 @@ program
 
 program
   .command('disconnect')
-  .description('Remove as instrucoes injetadas, hooks, skills e a configuracao MCP preservando intacto o cofre .bathynaut/memory/')
-  .option('-d, --dir <path>', 'Diretorio raiz do projeto', process.cwd())
+  .description('Remove injected rules, hooks, skills, and MCP configuration while keeping .bathynaut/memory/ intact')
+  .option('-d, --dir <path>', 'Project root directory', process.cwd())
   .action((opts) => {
     runDisconnectCommand(path.resolve(opts.dir));
   });
 
 program
   .command('hooks [action]')
-  .description('Instala ou remove hooks Git nativos e Agent Lifecycle Hooks (install | uninstall)')
-  .option('-d, --dir <path>', 'Diretorio raiz do projeto', process.cwd())
+  .description('Install or remove native Git hooks and Agent Lifecycle Hooks (install | uninstall)')
+  .option('-d, --dir <path>', 'Project root directory', process.cwd())
   .action((action = 'install', opts) => {
     runHooksCommand(path.resolve(opts.dir), action === 'uninstall' ? 'uninstall' : 'install');
   });
 
 program
   .command('hook-guard')
-  .description('Avaliador rapido (<15ms) de Lifecycle Hooks (SessionStart | PreToolUse) para Antigravity, Claude Code, Cursor e Gemini CLI')
-  .option('-d, --dir <path>', 'Diretorio raiz do projeto', process.cwd())
-  .option('-e, --event <event>', 'Evento do hook (SessionStart | PreToolUse)', 'SessionStart')
+  .description('Fast (<15ms) Agent Lifecycle Hook evaluator (SessionStart | PreToolUse) for Antigravity, Claude Code, Cursor, and Gemini CLI')
+  .option('-d, --dir <path>', 'Project root directory', process.cwd())
+  .option('-e, --event <event>', 'Hook event name (SessionStart | PreToolUse)', 'SessionStart')
   .action(async (opts) => {
     const projectRoot = path.resolve(opts.dir);
     const event = opts.event === 'PreToolUse' ? 'PreToolUse' : 'SessionStart';

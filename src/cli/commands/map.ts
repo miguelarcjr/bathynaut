@@ -10,7 +10,7 @@ export async function runMapCommand(projectRoot: string, options: { force?: bool
   const dbPath = getDatabasePath(projectRoot);
   const db = initDatabase(dbPath);
   const { memoryRoot, vaultKind } = resolveMemoryVault(projectRoot);
-  console.log(`🌊 [Bathynaut v0.2 SOTA] Mapeando profundezas em: ${projectRoot} (Vault: ${vaultKind})`);
+  console.log(`🌊 [Bathynaut v0.2 SOTA] Mapping depths in: ${projectRoot} (Vault: ${vaultKind})`);
 
   try {
     const syncStats = await ensureFreshGraph(projectRoot, db, memoryRoot, { force: options.force ?? true });
@@ -25,16 +25,16 @@ export async function runMapCommand(projectRoot: string, options: { force?: bool
     const commCount = (db.prepare('SELECT COUNT(*) as c FROM communities').get() as { c: number }).c;
     const flowCount = (db.prepare('SELECT COUNT(*) as c FROM flows').get() as { c: number }).c;
 
-    console.log(`⚡ Sincronizados ${syncStats.syncedFiles} arquivos em ${syncStats.durationMs}ms`);
-    console.log(`🔗 Grafo Unificado: ${nodeCount} nos | ${edgeCount} arestas | ${commCount} comunidades | ${flowCount} fluxos de execucao`);
+    console.log(`⚡ Synced ${syncStats.syncedFiles} files in ${syncStats.durationMs}ms`);
+    console.log(`🔗 Unified Graph: ${nodeCount} nodes | ${edgeCount} edges | ${commCount} communities | ${flowCount} execution flows`);
     if (syncStats.staleAdrsCount > 0) {
-      console.log(`⚠️ Alerta: ${syncStats.staleAdrsCount} ADR(s) marcada(s) para revisao (codigo governado alterado)`);
+      console.log(`⚠️ Warning: ${syncStats.staleAdrsCount} ADR(s) flagged for review (governed code modified)`);
     }
 
     const outHtml = path.join(projectRoot, '.bathynaut', 'bathynaut.html');
     exportExplorerHTML(db, outHtml);
-    console.log(`📊 Dashboard D3.js exportado em: ${outHtml}`);
-    console.log('✅ Mapeamento SOTA concluido com sucesso!');
+    console.log(`📊 D3.js Ocean Canvas exported to: ${outHtml}`);
+    console.log('✅ SOTA mapping completed successfully!');
   } finally {
     db.close();
   }

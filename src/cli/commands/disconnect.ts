@@ -9,38 +9,38 @@ import { runHooksCommand } from './hooks.js';
  * `.bathynaut/memory/` Zettelkasten vault and original instructions.
  */
 export function runDisconnectCommand(projectRoot: string): void {
-  console.log('🔌 [Bathynaut] Desconectando regras, hooks, skills e configuracoes MCP (preservando o cofre de memoria)...');
+  console.log('🔌 [Bathynaut] Disconnecting rules, hooks, skills, and MCP configs (preserving memory vault)...');
 
   const agents = detectInstalledAgents(projectRoot);
   for (const ag of agents) {
     if (ag.rulesPath) {
       const removed = removeRulesFile(ag.rulesPath);
-      if (removed) console.log(`   ✓ Bloco Bathynaut removido de: ${ag.rulesPath}`);
+      if (removed) console.log(`   ✓ Removed Bathynaut block from: ${ag.rulesPath}`);
     }
     if (ag.extraRulesPaths) {
       for (const extraRule of ag.extraRulesPaths) {
         const removed = removeRulesFile(extraRule);
-        if (removed) console.log(`   ✓ Regra Bathynaut removida de: ${extraRule}`);
+        if (removed) console.log(`   ✓ Removed Bathynaut rule from: ${extraRule}`);
       }
     }
     if (ag.configPath) {
       const removed = removeMCPConfig(ag.configPath);
-      if (removed) console.log(`   ✓ Servidor MCP removido de: ${ag.configPath}`);
+      if (removed) console.log(`   ✓ Removed MCP server from: ${ag.configPath}`);
     }
     if (ag.extraConfigPaths) {
       for (const extraCfg of ag.extraConfigPaths) {
         const removed = removeMCPConfig(extraCfg);
-        if (removed) console.log(`   ✓ Servidor MCP removido de: ${extraCfg}`);
+        if (removed) console.log(`   ✓ Removed MCP server from: ${extraCfg}`);
       }
     }
     if (ag.hooksConfigPath) {
       const removed = removeAgentHooks(ag.hooksConfigPath);
-      if (removed) console.log(`   ✓ Lifecycle Hooks removidos de: ${ag.hooksConfigPath}`);
+      if (removed) console.log(`   ✓ Removed Lifecycle Hooks from: ${ag.hooksConfigPath}`);
     }
   }
 
   runHooksCommand(projectRoot, 'uninstall');
   removeCognitiveSkills(projectRoot);
 
-  console.log('✅ Bathynaut desconectado com seguranca. Seu cofre em .bathynaut/memory permanece intacto.');
+  console.log('✅ Bathynaut safely disconnected. Your memory vault in .bathynaut/memory remains intact.');
 }

@@ -10,4 +10,4 @@ if (!fs.existsSync(explorerDist)) fs.mkdirSync(explorerDist, { recursive: true }
 fs.copyFileSync('src/storage/schema.sql', path.join(storageDist, 'schema.sql'));
 fs.copyFileSync('src/explorer/template.html', path.join(explorerDist, 'template.html'));
 
-console.log('✅ Assets copiados para dist com sucesso!');
+console.log('✅ Assets copied to dist successfully!');

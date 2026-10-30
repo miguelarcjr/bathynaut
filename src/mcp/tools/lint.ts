@@ -9,8 +9,8 @@ import {
 } from '../../graph/insights.js';
 
 export const LintSchema = z.object({
-  project_path: z.string().optional().describe('Caminho opcional do repositorio'),
-  workspace_hint: z.string().optional().describe('Alias para project_path')
+  project_path: z.string().optional().describe('Optional repository path'),
+  workspace_hint: z.string().optional().describe('Alias for project_path')
 });
 
 function walkRawFiles(dir: string): string[] {

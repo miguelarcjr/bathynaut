@@ -33,7 +33,7 @@ describe('Bathynaut Multi-Agent Auto-Installer & Vault Scaffolder', () => {
     let content = fs.readFileSync(rulesPath, 'utf-8');
     expect(content).toContain('Custom user stuff');
     expect(content).toContain('<!-- BATHYNAUT:START -->');
-    expect(content).toContain('Protocolo de Navegacao Oceanica Bathynaut');
+    expect(content).toContain('Bathynaut Oceanic Navigation Protocol');
 
     // Run again - must be idempotent (no duplicate blocks)
     injectRulesFile(rulesPath);

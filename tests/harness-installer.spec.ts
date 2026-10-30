@@ -37,15 +37,15 @@ describe('Universal Multi-Agent Harness Installer v2 (Hooks, Skills, Rules, MCP 
 
     // 1. Rules & Context Includes
     const agentsMd = fs.readFileSync(path.join(tmpRepo, 'AGENTS.md'), 'utf-8');
-    expect(agentsMd).toContain('@[Contexto Ativo](.bathynaut/memory/activeContext.md)');
-    expect(agentsMd).toContain('@[Indice da Wiki](.bathynaut/memory/index.md)');
+    expect(agentsMd).toContain('@[Active Session Context](.bathynaut/memory/activeContext.md)');
+    expect(agentsMd).toContain('@[Wiki Index](.bathynaut/memory/index.md)');
 
     const geminiMd = fs.readFileSync(path.join(tmpRepo, 'GEMINI.md'), 'utf-8');
-    expect(geminiMd).toContain('@[Contexto Ativo](.bathynaut/memory/activeContext.md)');
+    expect(geminiMd).toContain('@[Active Session Context](.bathynaut/memory/activeContext.md)');
 
     const agyModularRule = fs.readFileSync(path.join(tmpRepo, '.agents', 'rules', 'bathynaut.md'), 'utf-8');
     expect(agyModularRule).toContain('trigger: always_on');
-    expect(agyModularRule).toContain('@[Contexto Ativo](.bathynaut/memory/activeContext.md)');
+    expect(agyModularRule).toContain('@[Active Session Context](.bathynaut/memory/activeContext.md)');
 
     const claudeMd = fs.readFileSync(path.join(tmpRepo, 'CLAUDE.md'), 'utf-8');
     expect(claudeMd).toContain('@.bathynaut/memory/activeContext.md');
@@ -135,3 +135,4 @@ describe('Universal Multi-Agent Harness Installer v2 (Hooks, Skills, Rules, MCP 
     expect(fs.existsSync(path.join(tmpRepo, '.bathynaut', 'memory', 'wiki'))).toBe(true);
   });
 });
+
