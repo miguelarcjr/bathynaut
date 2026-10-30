@@ -346,4 +346,4 @@ Bathynaut includes an automatic zero-dependency adapter (`src/storage/db.ts`) th
 
 ## 📄 License
 
-MIT © Miguel Arc & Antigravity
+MIT © Miguel Arc
