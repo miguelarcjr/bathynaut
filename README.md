@@ -136,10 +136,34 @@ Bathynaut exposes 7 high-density tools designed to minimize round-trips and resp
 
 ---
 
+## 🤖 Universal Multi-Agent Harness (Hooks, Skills, Rules & MCP)
+
+Running `npx bathynaut init` configures the entire cognitive harness across the major AI coding agents with automatic `.bak` backups in `.bathynaut/backups/` and 1-command rollback (`npx bathynaut disconnect`):
+
+| Agent Platform | MCP Server Config (`-d <repo>` pinned) | Rules & Progressive Disclosure Includes | Auto-Discovered Skills (6 Workflows) | Agent Lifecycle & Git Hooks |
+| :--- | :--- | :--- | :--- | :--- |
+| **Antigravity** | `~/.gemini/antigravity/mcp_config.json` | `AGENTS.md`, `GEMINI.md`, `.agents/rules/bathynaut.md` (with `@[Contexto Ativo](.bathynaut/memory/activeContext.md)` & `@[Indice da Wiki](.bathynaut/memory/index.md)`) | `.agents/skills/bathynaut-*/SKILL.md` | `.agents/hooks.json` (`SessionStart`, `PreToolUse`) |
+| **Claude Code** | `.mcp.json` (project) + `~/.claude.json` | `CLAUDE.md` (with `@.bathynaut/memory/activeContext.md` & `@.bathynaut/memory/index.md`) | `.claude/skills/bathynaut-*/SKILL.md` | `.claude/settings.json` (`SessionStart`, `PreToolUse`) |
+| **Cursor** | `.cursor/mcp.json` | `.cursor/rules/bathynaut.mdc` (`alwaysApply: true`, `globs: "**/*"`) + `.cursorrules` | `.cursor/skills/bathynaut-*/SKILL.md` | `.cursor/hooks.json` (`beforeShellExecution`) |
+| **Windsurf** | `~/.codeium/windsurf/mcp_config.json` | `.windsurfrules` + `AGENTS.md` | `.agents/skills/bathynaut-*/SKILL.md` | Git `post-merge`, `post-commit`, `post-checkout` |
+| **GitHub Copilot** | `.vscode/mcp.json` (`"servers"` + `"type": "stdio"`) | `.github/copilot-instructions.md` | `.agents/skills/bathynaut-*/SKILL.md` | Git `post-merge`, `post-commit`, `post-checkout` |
+| **Gemini CLI** | `.gemini/settings.json` | `GEMINI.md` | `.agents/skills/bathynaut-*/SKILL.md` | `.gemini/settings.json` (`SessionStart`, `PreToolUse`) |
+| **OpenCode / Codex** | `opencode.json` (`"mcp"` local) | `AGENTS.md` | `.agents/skills/bathynaut-*/SKILL.md` | Git `post-merge`, `post-commit`, `post-checkout` |
+
+### Built-in Cognitive Skills (Installed Automatically)
+1. **`bathynaut-map-project`**: 6-Domain Deep Architecture & CoALA Zettelkasten Mapping (`bathynaut_dive` + `bathynaut_log_adr` + `bathynaut_lint`).
+2. **`bathynaut-wiki-compile`**: Compiles raw documents from `.bathynaut/memory/raw/` into atomic Zettelkasten notes with `sources` and typed edges.
+3. **`bathynaut-wiki-lint`**: 5D Graph Health Audit (`orphan_active_notes`, `dangling_links`, `stale_adrs`, `untested_god_nodes`, `uncompiled_raw_sources`).
+4. **`bathynaut-session-checkpoint`**: Persists hot episodic session state (`activeContext.md`) & compiles session learnings.
+5. **`bathynaut-review-changes`**: Pre-commit / PR Blast Radius & Risk Score Review (`bathynaut_sonar({ git_diff: "HEAD" })`).
+6. **`bathynaut-refactor-safely`**: Safe Cross-File Symbol Refactoring & `blocking_invariants` Verification.
+
+---
+
 ## 🛠️ CLI Reference
 
 ```bash
-# 1. Initialize vault, agent rules, MCP config, and map repository
+# 1. Initialize vault, agent rules, skills, lifecycle hooks, MCP config, and map repository
 npx bathynaut init
 
 # 2. Incremental AST + Zettelkasten sync (<50ms if unchanged; --force for full rebuild)
@@ -154,10 +178,16 @@ npx bathynaut explore
 # 5. Run the 5D Graph & Memory Health Audit
 npx bathynaut doctor
 
-# 6. Safely remove injected agent rules & MCP entries while preserving .bathynaut/memory/
+# 6. Install or remove Git hooks + Agent Lifecycle Hooks
+npx bathynaut hooks [install|uninstall]
+
+# 7. Fast (<15ms) Agent Lifecycle Hook evaluator (invoked automatically by SessionStart / PreToolUse)
+npx bathynaut hook-guard --event <SessionStart|PreToolUse>
+
+# 8. Safely remove injected agent rules, skills, hooks & MCP entries while preserving .bathynaut/memory/
 npx bathynaut disconnect
 
-# 7. Run the MCP server over stdio
+# 9. Run the MCP server over stdio
 npx bathynaut serve
 ```
 

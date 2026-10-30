@@ -5,7 +5,7 @@ import { runInitCommand } from './commands/init.js';
 import { runMapCommand } from './commands/map.js';
 import { runReviewCommand } from './commands/review.js';
 import { runDisconnectCommand } from './commands/disconnect.js';
-import { runHooksCommand } from './commands/hooks.js';
+import { runHooksCommand, evaluateHookGuard } from './commands/hooks.js';
 import { initDatabase, getDatabasePath } from '../storage/db.js';
 import { resolveMemoryVault } from '../storage/pool.js';
 import { runServerStdio } from '../mcp/server.js';
@@ -21,7 +21,7 @@ program
 
 program
   .command('init')
-  .description('Inicializa o cofre Zettelkasten CoALA, injeta regras/MCP nos agentes detectados e mapeia o projeto')
+  .description('Inicializa o cofre Zettelkasten CoALA, injeta regras/MCP/hooks/skills nos agentes detectados e mapeia o projeto')
   .option('-d, --dir <path>', 'Diretorio raiz do projeto', process.cwd())
   .action(async (opts) => {
     await runInitCommand(path.resolve(opts.dir));
@@ -102,7 +102,7 @@ program
 
 program
   .command('disconnect')
-  .description('Remove as instrucoes injetadas e a configuracao MCP preservando intacto o cofre .bathynaut/memory/')
+  .description('Remove as instrucoes injetadas, hooks, skills e a configuracao MCP preservando intacto o cofre .bathynaut/memory/')
   .option('-d, --dir <path>', 'Diretorio raiz do projeto', process.cwd())
   .action((opts) => {
     runDisconnectCommand(path.resolve(opts.dir));
@@ -110,10 +110,49 @@ program
 
 program
   .command('hooks [action]')
-  .description('Instala ou remove hooks Git nativos (install | uninstall)')
+  .description('Instala ou remove hooks Git nativos e Agent Lifecycle Hooks (install | uninstall)')
   .option('-d, --dir <path>', 'Diretorio raiz do projeto', process.cwd())
   .action((action = 'install', opts) => {
     runHooksCommand(path.resolve(opts.dir), action === 'uninstall' ? 'uninstall' : 'install');
+  });
+
+program
+  .command('hook-guard')
+  .description('Avaliador rapido (<15ms) de Lifecycle Hooks (SessionStart | PreToolUse) para Antigravity, Claude Code, Cursor e Gemini CLI')
+  .option('-d, --dir <path>', 'Diretorio raiz do projeto', process.cwd())
+  .option('-e, --event <event>', 'Evento do hook (SessionStart | PreToolUse)', 'SessionStart')
+  .action(async (opts) => {
+    const projectRoot = path.resolve(opts.dir);
+    const event = opts.event === 'PreToolUse' ? 'PreToolUse' : 'SessionStart';
+
+    let rawStdin = '';
+    if (!process.stdin.isTTY) {
+      rawStdin = await new Promise<string>((resolve) => {
+        const chunks: Buffer[] = [];
+        const timer = setTimeout(() => resolve(Buffer.concat(chunks).toString('utf-8')), 40);
+        process.stdin.on('data', (chunk) => chunks.push(Buffer.from(chunk)));
+        process.stdin.on('end', () => {
+          clearTimeout(timer);
+          resolve(Buffer.concat(chunks).toString('utf-8'));
+        });
+        process.stdin.on('error', () => {
+          clearTimeout(timer);
+          resolve('');
+        });
+      });
+    }
+
+    let payload: Record<string, any> = {};
+    if (rawStdin.trim()) {
+      try {
+        payload = JSON.parse(rawStdin);
+      } catch {}
+    }
+
+    const out = evaluateHookGuard(projectRoot, event, payload);
+    if (out.hookSpecificOutput) {
+      process.stdout.write(JSON.stringify(out) + '\n');
+    }
   });
 
 program.parse();
