@@ -147,3 +147,4 @@ Nova regra substituindo [[adr-001-old]].
     expect(packed.usedTokens).toBeLessThanOrEqual(150);
   });
 });
+

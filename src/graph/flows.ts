@@ -116,3 +116,4 @@ export function detectAndPersistFlows(db: Database, maxDepth = 6): FlowRecord[] 
 
   return detectedFlows;
 }
+

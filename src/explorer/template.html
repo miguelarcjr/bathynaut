@@ -206,10 +206,14 @@
       .on("click", (event, d) => showDetails(d));
 
     node.append("circle")
-      .attr("r", d => d.kind === 'adr' ? 9 : (d.kind === 'class' ? 8 : 6))
+      .attr("r", d => {
+        const base = d.kind === 'adr' || d.kind === 'incident' ? 9 : (d.kind === 'class' ? 8 : 6);
+        const prBoost = Math.min(8, (d.pagerank_score || 0) * 20);
+        return base + prBoost;
+      })
       .attr("fill", nodeColor)
-      .attr("stroke", "#fff")
-      .attr("stroke-width", 1)
+      .attr("stroke", d => d.is_bridge ? "#fbbf24" : "#fff")
+      .attr("stroke-width", d => d.is_bridge ? 2 : 1)
       .attr("style", "filter: drop-shadow(0 0 6px rgba(56, 189, 248, 0.5)); cursor: pointer;");
 
     node.append("text")
@@ -235,12 +239,24 @@
       const content = document.getElementById('panel-content');
       panel.classList.add('open');
 
+      let invariantsHtml = '';
+      try {
+        const invs = JSON.parse(d.invariants_json || '[]');
+        if (invs.length > 0) {
+          invariantsHtml = `<div style="margin-bottom: 12px; font-size: 0.8rem; color: #fbbf24;"><strong>Invariantes (${d.enforcement || 'advisory'}):</strong><ul style="padding-left: 16px; margin-top: 4px;">${invs.map(i => `<li>${i}</li>`).join('')}</ul></div>`;
+        }
+      } catch {}
+
+      const excerptBlock = d.body_markdown || d.code_excerpt || '';
+
       content.innerHTML = `
-        <span class="badge ${d.depth_zone}">${d.depth_zone} • ${d.kind}</span>
+        <span class="badge ${d.depth_zone}">${d.depth_zone} • ${d.kind}${d.is_bridge ? ' • BRIDGE' : ''}</span>
         <h2 style="font-size: 1.2rem; margin-bottom: 8px;">${d.name}</h2>
-        <p style="font-size: 0.85rem; color: #9ca3af; margin-bottom: 16px;">${d.summary || 'Sem resumo.'}</p>
-        ${d.file_path ? `<div style="font-size: 0.75rem; color: #6b7280; margin-bottom: 12px;">${d.file_path}</div>` : ''}
-        ${d.body_markdown ? `<div style="background: rgba(0,0,0,0.3); padding: 12px; border-radius: 8px; font-size: 0.8rem; white-space: pre-wrap; max-height: 300px; overflow-y: auto;">${d.body_markdown}</div>` : ''}
+        ${d.signature ? `<code style="display:block; background: rgba(0,0,0,0.4); padding: 6px 8px; border-radius: 6px; font-size: 0.75rem; color: #38bdf8; margin-bottom: 10px;">${d.signature}</code>` : ''}
+        <p style="font-size: 0.85rem; color: #9ca3af; margin-bottom: 12px;">${d.summary || 'Sem resumo.'}</p>
+        ${d.file_path ? `<div style="font-size: 0.75rem; color: #6b7280; margin-bottom: 12px;">📄 ${d.file_path}${d.line_start ? `:${d.line_start}-${d.line_end || d.line_start}` : ''}</div>` : ''}
+        ${invariantsHtml}
+        ${excerptBlock ? `<div style="background: rgba(0,0,0,0.3); padding: 12px; border-radius: 8px; font-size: 0.8rem; white-space: pre-wrap; max-height: 300px; overflow-y: auto; font-family: monospace;">${excerptBlock}</div>` : ''}
       `;
     }
 

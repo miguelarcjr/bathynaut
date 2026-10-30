@@ -110,3 +110,4 @@ B`);
     expect(sharedEdges[0].relation).toBe('shares_scope_with');
   });
 });
+

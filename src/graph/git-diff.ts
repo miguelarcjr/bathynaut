@@ -54,3 +54,4 @@ export function getGitDiffRanges(
     return {};
   }
 }
+

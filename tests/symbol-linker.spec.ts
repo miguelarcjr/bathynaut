@@ -125,3 +125,4 @@ O incidente ocorreu dentro da funcao \`processInvoice()\` quando o id era nulo.
     expect(inlineEdge?.confidence).toBe('INFERRED');
   });
 });
+

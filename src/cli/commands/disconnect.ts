@@ -22,3 +22,4 @@ export function runDisconnectCommand(projectRoot: string): void {
 
   console.log('✅ Bathynaut desconectado com seguranca. Seu cofre em .bathynaut/memory permanece intacto.');
 }
+
