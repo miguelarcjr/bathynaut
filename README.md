@@ -28,22 +28,24 @@ In a single command, Bathynaut:
 
 ---
 
-## 🏆 Why Bathynaut v0.2 SOTA? (Architectural Comparison)
+## 🏆 Why Bathynaut SOTA? (Architectural Comparison vs. The Knowledge Graph Ecosystem)
 
-We engineered Bathynaut v0.2 by synthesizing and surpassing the strongest ideas from `code-review-graph`, `graphify`, and `graphicle`:
+We engineered Bathynaut by synthesizing and surpassing the strongest capabilities from **`zk-wiki-mcp`**, **`code-review-graph`**, **`graphify`**, and **`graphicle`** into a single unified engine:
 
-| Capability | Code-Review-Graph | Graphify | Graphicle | **Bathynaut v0.2 SOTA** |
-| :--- | :---: | :---: | :---: | :---: |
-| **Runtime & Portability** | Python (`pipx`) | Python | Python | **100% TypeScript / Node.js (`npx`, WASM + SQLite)** |
-| **Cross-File AST Call & Import Resolution** | ✅ Strong | ⚠️ Partial | ❌ Basic | **✅ Two-Pass Symbol & Import Linker (`EXTRACTED` / `INFERRED`)** |
-| **Execution Flow Tracing (Entrypoint → Leaf)** | ✅ `flows` | ❌ No | ❌ No | **✅ Criticality-Scored Execution Flows + `flow_memberships`** |
-| **Git Diff Line-Level Blast Radius + Risk Score** | ✅ Yes | ❌ No | ❌ No | **✅ `git diff --unified=0` Hunk Mapping + Risk Score `[0..1]`** |
-| **Macro Topology (Cohesion + Bridge Nodes)** | ⚠️ Basic | ✅ Strong | ✅ Strong | **✅ Louvain Intra-Cluster Cohesion + PageRank + Bridge Detection** |
-| **Causal Memory (CoALA + Zettelkasten + ADRs)** | ❌ None | ⚠️ Flat Wiki | ❌ None | **✅ 5-Category CoALA Vault + 10 Bidirectional Semantic Edges** |
-| **Executable Invariants & Stale ADR Detection** | ❌ None | ❌ None | ❌ None | **✅ `blocking \| warning \| advisory` + SHA-256 Stale ADR Flagging** |
-| **Search Engine** | FTS5 | Substring | BM25 + RRF | **✅ Hybrid RRF (FTS5 BM25 + Identifier Tokenizer + PageRank + Backlinks)** |
-| **Token Budget Packing (`token_budget`)** | ⚠️ Line slices | ❌ None | ❌ None | **✅ Priority-Sorted Excerpt Packer with Exact File:Line Citations** |
-| **Multi-Project MCP Routing + JIT Incremental Sync** | Single repo | CLI only | Global DB | **✅ `ProjectContextPool` (LRU) + `<50ms` `mtime` + SHA-256 JIT Sync** |
+| Capability | ZK-Wiki MCP | Code-Review-Graph | Graphify | Graphicle | **Bathynaut SOTA** |
+| :--- | :---: | :---: | :---: | :---: | :---: |
+| **Runtime & Portability** | TypeScript | Python (`pipx`) | Python | Python | **100% TypeScript / Node.js (`npx`, WASM + SQLite)** |
+| **Cross-File AST Call & Import Resolution** | ❌ None | ✅ Strong | ⚠️ Partial | ❌ Basic | **✅ Two-Pass Symbol & Import Linker (`EXTRACTED` / `INFERRED`)** |
+| **Execution Flow Tracing (Entrypoint → Leaf)** | ❌ None | ✅ `flows` | ❌ No | ❌ No | **✅ Criticality-Scored Execution Flows + `flow_memberships`** |
+| **Git Diff Line-Level Blast Radius + Risk Score** | ❌ None | ✅ Yes | ❌ No | ❌ No | **✅ `git diff --unified=0` Hunk Mapping + Risk Score `[0..1]`** |
+| **Macro Topology, Surprising Connections & Gaps** | ❌ None | ⚠️ Basic | ✅ Strong | ✅ Strong | **✅ Louvain Cohesion + Bridge Nodes + Architectural Drift + Knowledge Gaps** |
+| **Causal Memory (CoALA + Zettelkasten + ADRs)** | ✅ Strong (4 cats) | ❌ None | ⚠️ Flat Wiki | ❌ None | **✅ 5-Category CoALA Vault + 10 Bidirectional Semantic Edges** |
+| **Physical `.md` Frontmatter Mutation on `supersedes`** | ✅ Yes | ❌ None | ❌ None | ❌ None | **✅ Rewrites Old `.md` (`status: superseded` + `superseded_by`) + SQLite** |
+| **Declarative Upsert (`id`), `sources` (`raw/`) & Batch `ids` Read** | ✅ Yes | ❌ None | ❌ None | ❌ None | **✅ Full Parity (`id`, `sources`, `uncompiled_raw_sources`, `ids` batch)** |
+| **Executable Invariants & Stale ADR Detection** | ❌ None | ❌ None | ❌ None | ❌ None | **✅ `blocking \| warning \| advisory` + SHA-256 Stale ADR Flagging** |
+| **Deterministic Symbol Rename Preview & Large Functions** | ❌ None | ✅ `refactor_tool` | ❌ None | ❌ None | **✅ `rename_symbol` Cross-File Preview + `large_functions` Detector** |
+| **Search Engine** | FTS5 BM25 | FTS5 | Substring | BM25 + RRF | **✅ Hybrid RRF (FTS5 BM25 + Identifier Tokenizer + PageRank + Backlinks + `cross_repo`)** |
+| **3-Column IDE Visual Debugger (`bathynaut.html`)** | ✅ 3-Column | ❌ None | ⚠️ Basic | ❌ None | **✅ 3-Column IDE (Sonar Glob Simulator + Animated Particles + Breadcrumbs)** |
 
 ---
 

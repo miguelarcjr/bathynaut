@@ -1,3 +1,4 @@
+import path from 'node:path';
 import { Server } from '@modelcontextprotocol/sdk/server/index.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import {
@@ -139,14 +140,24 @@ export function createMCPServer(
   // Call tool
   server.setRequestHandler(CallToolRequestSchema, async (request) => {
     const { name, arguments: args = {} } = request.params;
-    const rawProjectPath = (args as any)?.project_path as string | undefined;
+    const rawArgs = args as Record<string, any>;
+
+    // Infer workspace hint from project_path, workspace_hint, or any absolute path in files/file_paths/sources/applies_to
+    const pathCandidates: string[] = [
+      ...(Array.isArray(rawArgs.files) ? rawArgs.files : []),
+      ...(Array.isArray(rawArgs.file_paths) ? rawArgs.file_paths : []),
+      ...(Array.isArray(rawArgs.sources) ? rawArgs.sources : []),
+      ...(Array.isArray(rawArgs.applies_to) ? rawArgs.applies_to : [])
+    ];
+    const absCandidate = pathCandidates.find(p => typeof p === 'string' && path.isAbsolute(p));
+    const inferredHint = (rawArgs.project_path || rawArgs.workspace_hint || absCandidate) as string | undefined;
 
     let activeDb = defaultDb;
     let activeMemoryRoot = defaultMemoryRoot;
     let activeProjectRoot = defaultProjectRoot;
 
-    if (rawProjectPath) {
-      const ctx = pool.getContext(rawProjectPath);
+    if (inferredHint) {
+      const ctx = pool.getContext(inferredHint);
       activeDb = ctx.db;
       activeMemoryRoot = ctx.memoryRoot;
       activeProjectRoot = ctx.projectRoot;

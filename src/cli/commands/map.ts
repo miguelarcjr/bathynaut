@@ -3,6 +3,8 @@ import { getDatabasePath, initDatabase } from '../../storage/db.js';
 import { resolveMemoryVault, registerProjectInGlobalRegistry } from '../../storage/pool.js';
 import { ensureFreshGraph } from '../../storage/incremental-sync.js';
 import { exportExplorerHTML } from '../../explorer/exporter.js';
+import { generateCommunityArchitectureNotes } from '../../graph/insights.js';
+import { generateMOCIndex } from '../../parsers/markdown/scanner.js';
 
 export async function runMapCommand(projectRoot: string, options: { force?: boolean } = {}): Promise<void> {
   const dbPath = getDatabasePath(projectRoot);
@@ -12,6 +14,10 @@ export async function runMapCommand(projectRoot: string, options: { force?: bool
 
   try {
     const syncStats = await ensureFreshGraph(projectRoot, db, memoryRoot, { force: options.force ?? true });
+    const autoArchCount = generateCommunityArchitectureNotes(memoryRoot, db);
+    if (autoArchCount > 0) {
+      generateMOCIndex(memoryRoot, db);
+    }
     registerProjectInGlobalRegistry(projectRoot, memoryRoot);
 
     const nodeCount = (db.prepare('SELECT COUNT(*) as c FROM nodes').get() as { c: number }).c;

@@ -6,9 +6,11 @@ import { packWithinTokenBudget, PackableExcerptItem } from '../../storage/token-
 
 export const SonarSchema = z.object({
   files: z.array(z.string()).default([]).describe('Lista de caminhos de arquivos que serao editados ou analisados'),
+  file_paths: z.array(z.string()).optional().describe('Alias para files (compatibilidade com wiki_context_for_files)'),
   git_diff: z.string().optional().describe('Ref Git opcional (ex: "HEAD", "main") para extrair arquivos e linhas alteradas automaticamente'),
   token_budget: z.number().default(2500).describe('Orcamento maximo de tokens para os trechos de codigo e ADRs retornados'),
-  project_path: z.string().optional().describe('Caminho opcional do repositorio (para roteamento multi-projeto)')
+  project_path: z.string().optional().describe('Caminho opcional do repositorio (para roteamento multi-projeto)'),
+  workspace_hint: z.string().optional().describe('Alias para project_path')
 });
 
 export function handleSonar(
@@ -21,7 +23,8 @@ export function handleSonar(
     : undefined;
 
   const diffFiles = changedLineRanges ? Object.keys(changedLineRanges) : [];
-  const targetFiles = Array.from(new Set([...(args.files || []), ...diffFiles]));
+  const inputFiles = [...(args.files || []), ...(args.file_paths || [])];
+  const targetFiles = Array.from(new Set([...inputFiles, ...diffFiles]));
 
   const blast = calculateBlastRadius(db, targetFiles, { changedLineRanges });
 

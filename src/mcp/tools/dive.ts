@@ -1,10 +1,19 @@
 import { Database } from 'better-sqlite3';
 import { z } from 'zod';
+import {
+  detectSurprisingConnections,
+  detectKnowledgeGaps,
+  findLargeFunctions,
+  previewSymbolRename
+} from '../../graph/insights.js';
 
 export const DiveSchema = z.object({
   community_id: z.number().optional().describe('ID da comunidade topologica para inspecionar'),
   query: z.string().optional().describe('Termo de busca para encontrar subsistemas'),
-  project_path: z.string().optional().describe('Caminho opcional do repositorio')
+  rename_symbol: z.string().optional().describe('Nome ou ID do simbolo para simular refatoracao/rename cross-file'),
+  new_name: z.string().optional().describe('Novo nome desejado para o simbolo em rename_symbol'),
+  project_path: z.string().optional().describe('Caminho opcional do repositorio'),
+  workspace_hint: z.string().optional().describe('Alias para project_path')
 });
 
 export function handleDive(db: Database, args: z.infer<typeof DiveSchema>) {
@@ -40,6 +49,15 @@ export function handleDive(db: Database, args: z.infer<typeof DiveSchema>) {
     LIMIT 10
   `).all();
 
+  const surprisingConnections = detectSurprisingConnections(db, 10);
+  const knowledgeGaps = detectKnowledgeGaps(db);
+  const largeFunctions = findLargeFunctions(db, 50, 10);
+
+  const renamePreview =
+    args.rename_symbol && args.new_name
+      ? previewSymbolRename(db, args.rename_symbol, args.new_name)
+      : undefined;
+
   return {
     content: [
       {
@@ -49,7 +67,11 @@ export function handleDive(db: Database, args: z.infer<typeof DiveSchema>) {
             communities,
             top_god_nodes: godNodes,
             bridge_nodes: bridgeNodes,
-            top_flows: topFlows
+            top_flows: topFlows,
+            surprising_connections: surprisingConnections,
+            knowledge_gaps: knowledgeGaps,
+            large_functions: largeFunctions,
+            ...(renamePreview ? { rename_preview: renamePreview } : {})
           },
           null,
           2

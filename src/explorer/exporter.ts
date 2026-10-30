@@ -31,6 +31,7 @@ export function exportExplorerHTML(db: Database, outputPath: string): string {
       pagerank_score: n.pagerank_score,
       is_bridge: n.is_bridge,
       enforcement: n.enforcement,
+      applies_to_json: n.applies_to_json,
       invariants_json: n.invariants_json,
       status: n.status,
       summary: n.summary,

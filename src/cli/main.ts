@@ -5,6 +5,7 @@ import { runInitCommand } from './commands/init.js';
 import { runMapCommand } from './commands/map.js';
 import { runReviewCommand } from './commands/review.js';
 import { runDisconnectCommand } from './commands/disconnect.js';
+import { runHooksCommand } from './commands/hooks.js';
 import { initDatabase, getDatabasePath } from '../storage/db.js';
 import { resolveMemoryVault } from '../storage/pool.js';
 import { runServerStdio } from '../mcp/server.js';
@@ -105,6 +106,14 @@ program
   .option('-d, --dir <path>', 'Diretorio raiz do projeto', process.cwd())
   .action((opts) => {
     runDisconnectCommand(path.resolve(opts.dir));
+  });
+
+program
+  .command('hooks [action]')
+  .description('Instala ou remove hooks Git nativos (install | uninstall)')
+  .option('-d, --dir <path>', 'Diretorio raiz do projeto', process.cwd())
+  .action((action = 'install', opts) => {
+    runHooksCommand(path.resolve(opts.dir), action === 'uninstall' ? 'uninstall' : 'install');
   });
 
 program.parse();

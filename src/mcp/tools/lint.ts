@@ -2,23 +2,45 @@ import { Database } from 'better-sqlite3';
 import { z } from 'zod';
 import fs from 'node:fs';
 import path from 'node:path';
+import {
+  detectSurprisingConnections,
+  detectKnowledgeGaps,
+  findLargeFunctions
+} from '../../graph/insights.js';
 
 export const LintSchema = z.object({
-  project_path: z.string().optional().describe('Caminho opcional do repositorio')
+  project_path: z.string().optional().describe('Caminho opcional do repositorio'),
+  workspace_hint: z.string().optional().describe('Alias para project_path')
 });
+
+function walkRawFiles(dir: string): string[] {
+  if (!fs.existsSync(dir)) return [];
+  const results: string[] = [];
+  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+    if (entry.name.startsWith('.') || entry.name.toLowerCase() === 'readme.md') continue;
+    const full = path.join(dir, entry.name);
+    if (entry.isDirectory()) {
+      results.push(...walkRawFiles(full));
+    } else if (entry.isFile()) {
+      results.push(full);
+    }
+  }
+  return results;
+}
 
 export function handleLint(db: Database, memoryRoot?: string) {
   // 1. Orphan nodes (no incoming and no outgoing edges)
   const orphans = db.prepare(`
     SELECT id, name, kind, file_path
     FROM nodes
-    WHERE id NOT IN (SELECT source_id FROM edges)
+    WHERE status = 'active'
+      AND id NOT IN (SELECT source_id FROM edges)
       AND id NOT IN (SELECT target_id FROM edges)
   `).all();
 
-  // 2. Broken edges (source or target not in nodes table)
+  // 2. Broken edges / Dangling links (source or target not in nodes table)
   const brokenEdges = db.prepare(`
-    SELECT source_id, target_id, relation
+    SELECT source_id, target_id, relation, context_snippet
     FROM edges
     WHERE source_id NOT IN (SELECT id FROM nodes)
        OR target_id NOT IN (SELECT id FROM nodes)
@@ -50,18 +72,39 @@ export function handleLint(db: Database, memoryRoot?: string) {
     LIMIT 20
   `).all();
 
-  // 5. Pending raw files in memoryRoot/raw
-  let pendingRawFiles: string[] = [];
+  // 5. Uncompiled raw files (cross-checked against sources_json of compiled notes — ZK-Wiki parity)
+  const compiledSources = new Set<string>();
+  const sourceRows = db.prepare('SELECT sources_json FROM nodes WHERE sources_json IS NOT NULL').all() as Array<{ sources_json: string }>;
+  for (const row of sourceRows) {
+    try {
+      const list = JSON.parse(row.sources_json) as string[];
+      for (const s of list) {
+        const norm = s.replace(/\\/g, '/');
+        compiledSources.add(norm);
+        compiledSources.add(path.basename(norm));
+      }
+    } catch {}
+  }
+
+  let uncompiledRawSources: string[] = [];
+  let pendingRawBasenames: string[] = [];
   if (memoryRoot) {
     const rawDir = path.join(memoryRoot, 'raw');
-    if (fs.existsSync(rawDir)) {
-      try {
-        pendingRawFiles = fs
-          .readdirSync(rawDir)
-          .filter(f => !f.startsWith('.') && f.toLowerCase() !== 'readme.md');
-      } catch {}
+    const allRawAbs = walkRawFiles(rawDir);
+    for (const absFile of allRawAbs) {
+      const relToMemory = path.relative(memoryRoot, absFile).replace(/\\/g, '/');
+      const base = path.basename(absFile);
+      if (!compiledSources.has(relToMemory) && !compiledSources.has(base)) {
+        uncompiledRawSources.push(relToMemory);
+        pendingRawBasenames.push(base);
+      }
     }
   }
+
+  // 6. Architectural Drift (Surprising Connections), Knowledge Gaps & Monolithic Large Functions
+  const surprisingConnections = detectSurprisingConnections(db, 10);
+  const knowledgeGaps = detectKnowledgeGaps(db);
+  const largeFunctions = findLargeFunctions(db, 50, 15);
 
   const totalNodes = (db.prepare('SELECT COUNT(*) as c FROM nodes').get() as { c: number }).c;
   const totalEdges = (db.prepare('SELECT COUNT(*) as c FROM edges').get() as { c: number }).c;
@@ -78,17 +121,24 @@ export function handleLint(db: Database, memoryRoot?: string) {
         text: JSON.stringify(
           {
             status: isHealthy ? 'HEALTHY' : 'WARNINGS_FOUND',
+            health_status: isHealthy ? 'healthy' : 'needs_attention',
             stats: { total_nodes: totalNodes, total_edges: totalEdges },
             orphan_nodes_count: orphans.length,
             orphan_nodes: orphans.slice(0, 20),
+            orphan_active_notes: orphans.slice(0, 20),
             broken_edges_count: brokenEdges.length,
             broken_edges: brokenEdges.slice(0, 20),
+            dangling_links: brokenEdges.slice(0, 20),
             stale_adrs_count: staleAdrs.length,
             stale_adrs: staleAdrs,
             untested_god_nodes_count: untestedGodNodes.length,
             untested_god_nodes: untestedGodNodes,
-            pending_raw_files_count: pendingRawFiles.length,
-            pending_raw_files: pendingRawFiles
+            pending_raw_files_count: pendingRawBasenames.length,
+            pending_raw_files: pendingRawBasenames,
+            uncompiled_raw_sources: uncompiledRawSources,
+            large_functions: largeFunctions,
+            surprising_connections: surprisingConnections,
+            knowledge_gaps: knowledgeGaps
           },
           null,
           2
