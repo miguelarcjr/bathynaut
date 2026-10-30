@@ -7,16 +7,15 @@ export interface CommunityResult {
   id: number;
   name: string;
   size: number;
+  cohesion: number;
   members: string[];
 }
 
 export function detectAndPersistCommunities(graph: any, db?: Database): CommunityResult[] {
   if (!graph || graph.order === 0) return [];
 
-  // Run Louvain community detection
   const communitiesMap = louvain(graph) as Record<string, number>;
 
-  // Group nodes by community id
   const grouped = new Map<number, string[]>();
   for (const [nodeId, commId] of Object.entries(communitiesMap)) {
     const numericId = Number(commId);
@@ -28,6 +27,26 @@ export function detectAndPersistCommunities(graph: any, db?: Database): Communit
   const results: CommunityResult[] = [];
 
   for (const [commId, members] of grouped.entries()) {
+    const memberSet = new Set(members);
+    let internalEdges = 0;
+    let boundaryEdges = 0;
+
+    for (const nodeId of members) {
+      const neighbors: string[] = graph.neighbors ? graph.neighbors(nodeId) : [];
+      for (const nb of neighbors) {
+        if (memberSet.has(nb)) {
+          internalEdges++;
+        } else {
+          boundaryEdges++;
+        }
+      }
+    }
+
+    const totalDegreeEdges = internalEdges + boundaryEdges;
+    const cohesion = totalDegreeEdges > 0
+      ? Number((internalEdges / totalDegreeEdges).toFixed(3))
+      : 1.0;
+
     const filePaths = members
       .map(id => graph.getNodeAttribute(id, 'file_path'))
       .filter(Boolean) as string[];
@@ -50,13 +69,15 @@ export function detectAndPersistCommunities(graph: any, db?: Database): Communit
       id: commId,
       name: commName,
       size: members.length,
+      cohesion,
       members
     });
 
     if (db) {
       db.prepare(`
-        INSERT OR REPLACE INTO communities (id, name, size) VALUES (?, ?, ?)
-      `).run(commId, commName, members.length);
+        INSERT OR REPLACE INTO communities (id, name, cohesion, size)
+        VALUES (?, ?, ?, ?)
+      `).run(commId, commName, cohesion, members.length);
 
       const updateNodeStmt = db.prepare('UPDATE nodes SET community_id = ? WHERE id = ?');
       for (const memberId of members) {
