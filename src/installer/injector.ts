@@ -19,9 +19,19 @@ const CORE_PROTOCOL_LINES = [
   '   - At the end of any meaningful task, call `bathynaut_checkpoint` to persist the hot session state in `activeContext.md`.'
 ];
 
-function buildRulesBlock(filePath: string): string {
+function resolveRelativeMemoryPrefix(projectRoot?: string): string {
+  if (projectRoot && fs.existsSync(path.join(projectRoot, '.agents', 'memory', 'wiki'))) {
+    return '.agents/memory';
+  }
+  return '.bathynaut/memory';
+}
+
+function buildRulesBlock(filePath: string, projectRoot?: string): string {
   const baseName = path.basename(filePath);
   const normalized = filePath.replace(/\\/g, '/');
+  const memPrefix = resolveRelativeMemoryPrefix(projectRoot);
+  const normRoot = projectRoot ? projectRoot.replace(/\\/g, '/') : undefined;
+  const rootHintLine = normRoot ? [`- Workspace Root (\`project_path\`): \`${normRoot}\` (always pass \`project_path: "${normRoot}"\` in Bathynaut MCP calls)`] : [];
 
   // 1. Cursor Modern Rule (.cursor/rules/bathynaut.mdc)
   if (baseName.endsWith('.mdc')) {
@@ -34,6 +44,7 @@ function buildRulesBlock(filePath: string): string {
       '',
       '<!-- BATHYNAUT:START -->',
       ...CORE_PROTOCOL_LINES,
+      ...(rootHintLine.length > 0 ? ['', '### Immediate Session Context:', ...rootHintLine] : []),
       '<!-- BATHYNAUT:END -->'
     ].join('\n');
   }
@@ -50,21 +61,23 @@ function buildRulesBlock(filePath: string): string {
       ...CORE_PROTOCOL_LINES,
       '',
       '### Immediate Session Context (Progressive Disclosure):',
-      '- Active Session State: @[Active Session Context](.bathynaut/memory/activeContext.md)',
-      '- Map of Content (MOC): @[Wiki Index](.bathynaut/memory/index.md)',
+      ...rootHintLine,
+      `- Active Session State: @[Active Session Context](${memPrefix}/activeContext.md)`,
+      `- Map of Content (MOC): @[Wiki Index](${memPrefix}/index.md)`,
       '<!-- BATHYNAUT:END -->'
     ].join('\n');
   }
 
-  // 3. Antigravity / Gemini Root Files (GEMINI.md, AGENTS.md)
+  // 3. Antigravity / Gemini Root Files (GEMINI.md, AGENTS.md, .agents/GEMINI.md)
   if (baseName === 'GEMINI.md' || baseName === 'AGENTS.md') {
     return [
       '<!-- BATHYNAUT:START -->',
       ...CORE_PROTOCOL_LINES,
       '',
       '### Immediate Session Context:',
-      '- Active Session State: @[Active Session Context](.bathynaut/memory/activeContext.md)',
-      '- Map of Content (MOC): @[Wiki Index](.bathynaut/memory/index.md)',
+      ...rootHintLine,
+      `- Active Session State: @[Active Session Context](${memPrefix}/activeContext.md)`,
+      `- Map of Content (MOC): @[Wiki Index](${memPrefix}/index.md)`,
       '<!-- BATHYNAUT:END -->'
     ].join('\n');
   }
@@ -76,8 +89,9 @@ function buildRulesBlock(filePath: string): string {
       ...CORE_PROTOCOL_LINES,
       '',
       '### Immediate Session Context:',
-      '- Active Session State: @.bathynaut/memory/activeContext.md',
-      '- Map of Content (MOC): @.bathynaut/memory/index.md',
+      ...rootHintLine,
+      `- Active Session State: @${memPrefix}/activeContext.md`,
+      `- Map of Content (MOC): @${memPrefix}/index.md`,
       '<!-- BATHYNAUT:END -->'
     ].join('\n');
   }
@@ -86,6 +100,7 @@ function buildRulesBlock(filePath: string): string {
   return [
     '<!-- BATHYNAUT:START -->',
     ...CORE_PROTOCOL_LINES,
+    ...(rootHintLine.length > 0 ? ['', '### Immediate Session Context:', ...rootHintLine] : []),
     '<!-- BATHYNAUT:END -->'
   ].join('\n');
 }
@@ -109,7 +124,7 @@ export function injectRulesFile(filePath: string, projectRoot?: string): boolean
     const dir = path.dirname(filePath);
     if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
 
-    const block = buildRulesBlock(filePath);
+    const block = buildRulesBlock(filePath, projectRoot);
 
     const normalized = filePath.replace(/\\/g, '/');
     if (filePath.endsWith('.mdc') || normalized.endsWith('.agents/rules/bathynaut.md')) {
@@ -124,12 +139,18 @@ export function injectRulesFile(filePath: string, projectRoot?: string): boolean
       existing = fs.readFileSync(filePath, 'utf-8');
     }
 
+    // Strip legacy Triad headers if migrating from ZK-Wiki + CRG + Graphify
+    existing = existing
+      .replace(/# Antigravity Knowledge Graph Integration \(Graphify, Code-Review-Graph & ZK-Wiki\)[\s\S]*?(?=<!-- BATHYNAUT:START -->|$)/g, '')
+      .replace(/# Protocolo SOTA de Memória Agêntica \(ZK-Wiki \+ CRG \+ Graphify\)[\s\S]*?(?=<!-- BATHYNAUT:START -->|$)/g, '')
+      .trim();
+
     if (existing.includes('<!-- BATHYNAUT:START -->')) {
       const updated = existing.replace(
         /<!-- BATHYNAUT:START -->[\s\S]*?<!-- BATHYNAUT:END -->/g,
         block.trim()
       );
-      fs.writeFileSync(filePath, updated, 'utf-8');
+      fs.writeFileSync(filePath, `${updated.trim()}\n`, 'utf-8');
     } else {
       const updated = existing ? `${existing.trim()}\n\n${block.trim()}\n` : `${block.trim()}\n`;
       fs.writeFileSync(filePath, updated, 'utf-8');
@@ -188,9 +209,11 @@ export function injectMCPConfig(
       }
     }
 
-    const args = projectRoot
-      ? [serverBinPath, 'serve', '-d', projectRoot]
-      : [serverBinPath, 'serve'];
+    const normalizedBin = serverBinPath.replace(/\\/g, '/');
+    const normalizedRoot = projectRoot ? projectRoot.replace(/\\/g, '/') : undefined;
+    const args = normalizedRoot
+      ? [normalizedBin, 'serve', '-d', normalizedRoot]
+      : [normalizedBin, 'serve'];
 
     if (format === 'vscode-servers') {
       if (!config.servers) config.servers = {};

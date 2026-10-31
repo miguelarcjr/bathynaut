@@ -54,8 +54,35 @@ function toStringArray(val: unknown): string[] {
   return [];
 }
 
+function parseMatterSafe(fileContent: string): { data: Record<string, any>; content: string } {
+  try {
+    return matter(fileContent);
+  } catch {
+    // Auto-heal unquoted colons in YAML frontmatter (e.g., legacy zk-wiki notes with `summary: Foo: Bar`)
+    const healed = fileContent.replace(/^---\r?\n([\s\S]*?)\r?\n---/, (_, yamlBlock: string) => {
+      const fixedLines = yamlBlock.split(/\r?\n/).map(line => {
+        const match = line.match(/^(\s*(?:title|summary)\s*:\s*)(.+)$/);
+        if (match) {
+          const val = match[2].trim();
+          if (!val.startsWith('"') && !val.startsWith("'") && val.includes(':')) {
+            return `${match[1]}${JSON.stringify(val)}`;
+          }
+        }
+        return line;
+      });
+      return `---\n${fixedLines.join('\n')}\n---`;
+    });
+    try {
+      return matter(healed);
+    } catch {
+      const stripped = fileContent.replace(/^---\r?\n[\s\S]*?\r?\n---\r?\n?/, '');
+      return { data: {}, content: stripped };
+    }
+  }
+}
+
 export function parseZettelkastenNote(filePath: string, fileContent: string): ParsedZettelNote {
-  const { data, content } = matter(fileContent);
+  const { data, content } = parseMatterSafe(fileContent);
   const validated = NoteFrontmatterSchema.safeParse(data);
   const frontmatter: any = validated.success ? { ...data, ...validated.data } : (data || {});
 

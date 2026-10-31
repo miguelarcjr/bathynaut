@@ -1,3 +1,4 @@
+import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
 
@@ -20,18 +21,30 @@ export function detectInstalledAgents(projectRoot: string): DetectedAgent[] {
   const homeDir = isTestEnv ? path.join(projectRoot, '.bathynaut', 'test-home') : os.homedir();
 
   // 1. Antigravity (Google DeepMind)
+  const agyExtraConfigs = [
+    path.join(homeDir, '.gemini', 'antigravity-ide', 'mcp_config.json')
+  ];
+  const geminiGlobalCfg = path.join(homeDir, '.gemini', 'config', 'mcp_config.json');
+  if (fs.existsSync(geminiGlobalCfg)) {
+    agyExtraConfigs.push(geminiGlobalCfg);
+  }
+
+  const agyExtraRules = [
+    path.join(projectRoot, 'GEMINI.md'),
+    path.join(projectRoot, '.agents', 'rules', 'bathynaut.md')
+  ];
+  const dotAgentsGemini = path.join(projectRoot, '.agents', 'GEMINI.md');
+  if (fs.existsSync(dotAgentsGemini)) {
+    agyExtraRules.push(dotAgentsGemini);
+  }
+
   agents.push({
     name: 'antigravity',
     configPath: path.join(homeDir, '.gemini', 'antigravity', 'mcp_config.json'),
-    extraConfigPaths: [
-      path.join(homeDir, '.gemini', 'antigravity-ide', 'mcp_config.json')
-    ],
+    extraConfigPaths: agyExtraConfigs,
     mcpFormat: 'mcpServers',
     rulesPath: path.join(projectRoot, 'AGENTS.md'),
-    extraRulesPaths: [
-      path.join(projectRoot, 'GEMINI.md'),
-      path.join(projectRoot, '.agents', 'rules', 'bathynaut.md')
-    ],
+    extraRulesPaths: agyExtraRules,
     skillsDir: path.join(projectRoot, '.agents', 'skills'),
     hooksConfigPath: path.join(projectRoot, '.agents', 'hooks.json')
   });

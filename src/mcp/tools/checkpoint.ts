@@ -5,7 +5,9 @@ import path from 'node:path';
 export const CheckpointSchema = z.object({
   summary: z.string().describe('Executive summary of progress achieved during the session'),
   active_tasks: z.array(z.string()).describe('List of immediate next tasks'),
-  decisions: z.array(z.string()).default([]).describe('Decisions made during the turn')
+  decisions: z.array(z.string()).default([]).describe('Decisions made during the turn'),
+  project_path: z.string().optional().describe('Optional repository path'),
+  workspace_hint: z.string().optional().describe('Alias for project_path')
 });
 
 export function handleCheckpoint(memoryRoot: string, args: z.infer<typeof CheckpointSchema>) {

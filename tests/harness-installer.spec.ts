@@ -59,11 +59,11 @@ describe('Universal Multi-Agent Harness Installer v2 (Hooks, Skills, Rules, MCP 
     expect(vscodeMcp.servers.bathynaut).toBeDefined();
     expect(vscodeMcp.servers.bathynaut.type).toBe('stdio');
     expect(vscodeMcp.servers.bathynaut.args).toContain('-d');
-    expect(vscodeMcp.servers.bathynaut.args).toContain(tmpRepo);
+    expect(vscodeMcp.servers.bathynaut.args).toContain(tmpRepo.replace(/\\/g, '/'));
 
     const claudeProjectMcp = JSON.parse(fs.readFileSync(path.join(tmpRepo, '.mcp.json'), 'utf-8'));
     expect(claudeProjectMcp.mcpServers.bathynaut.type).toBe('stdio');
-    expect(claudeProjectMcp.mcpServers.bathynaut.args).toContain(tmpRepo);
+    expect(claudeProjectMcp.mcpServers.bathynaut.args).toContain(tmpRepo.replace(/\\/g, '/'));
 
     const openCodeMcp = JSON.parse(fs.readFileSync(path.join(tmpRepo, 'opencode.json'), 'utf-8'));
     expect(openCodeMcp.mcp.bathynaut.type).toBe('local');

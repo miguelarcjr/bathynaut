@@ -128,7 +128,8 @@ export function createMCPServer(
             properties: {
               summary: { type: 'string', description: 'Summary of session progress' },
               active_tasks: { type: 'array', items: { type: 'string' }, description: 'Next active tasks' },
-              decisions: { type: 'array', items: { type: 'string' }, description: 'Decisions made during the turn' }
+              decisions: { type: 'array', items: { type: 'string' }, description: 'Decisions made during the turn' },
+              project_path: { type: 'string', description: 'Optional repository path' }
             },
             required: ['summary', 'active_tasks']
           }
