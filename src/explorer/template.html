@@ -315,9 +315,11 @@
       <button class="nav-btn" id="btn-fwd" disabled title="Forward">&rarr;</button>
       <input type="text" id="search-box" placeholder="Search function, class, ADR, or invariant (BM25 / Symbol)...">
       <select id="hop-mode" class="hop-select" title="Neighborhood radius">
-        <option value="all">Full Graph</option>
+        <option value="all">Smart Overview (Top 250)</option>
+        <option value="500">Extended Graph (Top 500)</option>
         <option value="1">1-Hop Ego</option>
         <option value="2">2-Hop Blast</option>
+        <option value="full">All Nodes (Unfiltered)</option>
       </select>
     </div>
     <div style="display:flex; align-items:center; gap:10px;">
@@ -404,9 +406,19 @@
     let historyStack = [];
     let historyIdx = -1;
 
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
     const canvasWrap = document.getElementById('canvas-wrap');
-    const width = canvasWrap.clientWidth || (window.innerWidth - 670);
-    const height = canvasWrap.clientHeight || (window.innerHeight - 84);
+    const width = canvasWrap.clientWidth || Math.max(600, window.innerWidth - 670);
+    const height = canvasWrap.clientHeight || Math.max(500, window.innerHeight - 84);
 
     const svg = d3.select("#graph-container").attr("viewBox", [0, 0, width, height]);
 
@@ -431,6 +443,10 @@
     g.append("text").attr("class", "zone-label").attr("x", 24).attr("y", height * 0.48).text("🌗 TWILIGHT ZONE • AST CALL GRAPH & SYMBOLS");
     g.append("text").attr("class", "zone-label").attr("x", 24).attr("y", height * 0.80).text("🌑 ABYSSAL ZONE • COALA ZETTELKASTEN MEMORY (ADRs & INCIDENTS)");
 
+    const linkLayer = g.append("g");
+    const particleLayer = g.append("g");
+    const nodeLayer = g.append("g");
+
     svg.call(d3.zoom()
       .extent([[0, 0], [width, height]])
       .scaleExtent([0.15, 6])
@@ -454,9 +470,11 @@
       return 'rgba(100, 116, 139, 0.45)';
     };
 
-    const simulation = d3.forceSimulation(DATA.nodes)
-      .force("link", d3.forceLink(DATA.edges).id(d => d.id).distance(70))
-      .force("charge", d3.forceManyBody().strength(-210))
+    function getEdgeSourceId(e) { return typeof e.source === 'object' ? e.source.id : e.source; }
+    function getEdgeTargetId(e) { return typeof e.target === 'object' ? e.target.id : e.target; }
+
+    let simulation = d3.forceSimulation()
+      .force("charge", d3.forceManyBody().strength(-190))
       .force("center", d3.forceCenter(width / 2, height / 2))
       .force("y", d3.forceY(d => {
         if (d.depth_zone === 'sunlight') return height * 0.22;
@@ -464,85 +482,189 @@
         return height * 0.50;
       }).strength(0.35));
 
-    const link = g.append("g")
-      .selectAll("line")
-      .data(DATA.edges)
-      .join("line")
-      .attr("stroke", edgeColor)
-      .attr("stroke-width", d => d.relation === 'governed_by' ? 1.8 : 1.2)
-      .attr("marker-end", "url(#arrow)");
-
-    // Animated Directional Particles along edges
-    const particles = g.append("g")
-      .selectAll("circle")
-      .data(DATA.edges.filter(e => e.relation !== 'belongs_to'))
-      .join("circle")
-      .attr("r", 2)
-      .attr("fill", d => d.relation === 'governed_by' ? '#fbbf24' : '#38bdf8')
-      .attr("opacity", 0.75);
+    let linkSel = linkLayer.selectAll("line");
+    let particleSel = particleLayer.selectAll("circle");
+    let nodeSel = nodeLayer.selectAll("g");
 
     let particleT = 0;
     d3.timer(() => {
       particleT = (particleT + 0.008) % 1;
-      particles
+      particleSel
         .attr("cx", d => (d.source.x || 0) + ((d.target.x || 0) - (d.source.x || 0)) * particleT)
         .attr("cy", d => (d.source.y || 0) + ((d.target.y || 0) - (d.source.y || 0)) * particleT);
     });
 
-    const node = g.append("g")
-      .selectAll("g")
-      .data(DATA.nodes)
-      .join("g")
-      .style("cursor", "pointer")
-      .call(d3.drag()
-        .on("start", (event, d) => {
-          if (!event.active) simulation.alphaTarget(0.3).restart();
-          d.fx = d.x; d.fy = d.y;
-        })
-        .on("drag", (event, d) => { d.fx = event.x; d.fy = event.y; })
-        .on("end", (event, d) => {
-          if (!event.active) simulation.alphaTarget(0);
-          d.fx = null; d.fy = null;
-        }))
-      .on("click", (event, d) => selectNode(d.id, true));
-
-    node.append("circle")
-      .attr("r", d => {
-        const base = d.depth_zone === 'abyssal' ? 9 : (d.kind === 'class' ? 8 : 6);
-        const prBoost = Math.min(8, (d.pagerank_score || 0) * 22);
-        return base + prBoost;
-      })
-      .attr("fill", nodeColor)
-      .attr("stroke", d => d.is_bridge ? "#fbbf24" : "#fff")
-      .attr("stroke-width", d => d.is_bridge ? 2.2 : 1);
-
-    node.append("text")
-      .text(d => d.name)
-      .attr("x", 11)
-      .attr("y", 3)
-      .attr("fill", "#e2e8f0")
-      .attr("font-size", "10px")
-      .attr("pointer-events", "none");
-
     simulation.on("tick", () => {
-      link
-        .attr("x1", d => d.source.x)
-        .attr("y1", d => d.source.y)
-        .attr("x2", d => d.target.x)
-        .attr("y2", d => d.target.y);
-      node.attr("transform", d => `translate(${d.x},${d.y})`);
+      linkSel
+        .attr("x1", d => d.source.x || 0)
+        .attr("y1", d => d.source.y || 0)
+        .attr("x2", d => d.target.x || 0)
+        .attr("y2", d => d.target.y || 0);
+      nodeSel.attr("transform", d => `translate(${d.x || 0},${d.y || 0})`);
     });
 
-    function getEdgeSourceId(e) { return typeof e.source === 'object' ? e.source.id : e.source; }
-    function getEdgeTargetId(e) { return typeof e.target === 'object' ? e.target.id : e.target; }
+    function computeActiveSubgraph() {
+      const q = document.getElementById('search-box').value.toLowerCase().trim();
+      const sonarGlob = document.getElementById('sonar-glob-input').value.toLowerCase().trim();
+      const hopMode = document.getElementById('hop-mode').value;
+
+      // 1-Hop or 2-Hop Ego network around selectedNodeId
+      if (selectedNodeId && (hopMode === '1' || hopMode === '2')) {
+        const egoSet = new Set([selectedNodeId]);
+        const maxHops = parseInt(hopMode, 10);
+        for (let step = 0; step < maxHops; step++) {
+          const current = Array.from(egoSet);
+          for (const e of DATA.edges) {
+            const u = getEdgeSourceId(e);
+            const v = getEdgeTargetId(e);
+            if (current.includes(u)) egoSet.add(v);
+            if (current.includes(v)) egoSet.add(u);
+          }
+        }
+        const visibleNodes = DATA.nodes.filter(n => egoSet.has(n.id));
+        const visibleSet = new Set(visibleNodes.map(n => n.id));
+        const visibleEdges = DATA.edges
+          .filter(e => visibleSet.has(getEdgeSourceId(e)) && visibleSet.has(getEdgeTargetId(e)))
+          .slice(0, 1200);
+        return { visibleNodes, visibleEdges };
+      }
+
+      // Filter candidates by kind, search query, and sonar glob
+      let candidates = DATA.nodes.filter(d => {
+        if (activeKindFilter !== 'all' && d.kind !== activeKindFilter) return false;
+        if (q && !(d.name.toLowerCase().includes(q) || d.id.toLowerCase().includes(q) || (d.summary || '').toLowerCase().includes(q))) return false;
+        if (sonarGlob) {
+          const cleanGlob = sonarGlob.replace(/\*/g, '');
+          const fp = (d.file_path || '').toLowerCase();
+          const applies = (d.applies_to_json || '').toLowerCase();
+          if (!fp.includes(cleanGlob) && !applies.includes(cleanGlob)) return false;
+        }
+        return true;
+      });
+
+      const budget = hopMode === 'full' ? 2000 : (hopMode === '500' ? 500 : 250);
+
+      // Always prioritize Abyssal Zettelkasten notes, selected node + its 1-hop neighbors, and top PageRank nodes
+      const mustIncludeIds = new Set();
+      if (selectedNodeId) {
+        mustIncludeIds.add(selectedNodeId);
+        for (const e of DATA.edges) {
+          const u = getEdgeSourceId(e);
+          const v = getEdgeTargetId(e);
+          if (u === selectedNodeId) mustIncludeIds.add(v);
+          if (v === selectedNodeId) mustIncludeIds.add(u);
+        }
+      }
+      for (const n of candidates) {
+        if (n.depth_zone === 'abyssal') mustIncludeIds.add(n.id);
+      }
+
+      const sortedCandidates = [...candidates].sort((a, b) => {
+        const aMust = mustIncludeIds.has(a.id) ? 1 : 0;
+        const bMust = mustIncludeIds.has(b.id) ? 1 : 0;
+        if (aMust !== bMust) return bMust - aMust;
+        return (b.pagerank_score || 0) - (a.pagerank_score || 0);
+      });
+
+      const visibleNodes = sortedCandidates.slice(0, budget);
+      const visibleSet = new Set(visibleNodes.map(n => n.id));
+      const visibleEdges = DATA.edges
+        .filter(e => visibleSet.has(getEdgeSourceId(e)) && visibleSet.has(getEdgeTargetId(e)))
+        .slice(0, 1500);
+
+      return { visibleNodes, visibleEdges };
+    }
+
+    function applyVisibilityFilters() {
+      const { visibleNodes, visibleEdges } = computeActiveSubgraph();
+
+      // Normalize edge endpoints back to node objects
+      const simEdges = visibleEdges.map(e => ({
+        ...e,
+        source: nodeById.get(getEdgeSourceId(e)),
+        target: nodeById.get(getEdgeTargetId(e))
+      })).filter(e => e.source && e.target);
+
+      linkSel = linkLayer
+        .selectAll("line")
+        .data(simEdges, d => `${d.source.id}->${d.target.id}:${d.relation}`)
+        .join("line")
+        .attr("stroke", edgeColor)
+        .attr("stroke-width", d => d.relation === 'governed_by' ? 1.8 : 1.2)
+        .attr("marker-end", "url(#arrow)");
+
+      particleSel = particleLayer
+        .selectAll("circle")
+        .data(simEdges.filter(e => e.relation !== 'belongs_to').slice(0, 220), d => `${d.source.id}->${d.target.id}:${d.relation}`)
+        .join("circle")
+        .attr("r", 2)
+        .attr("fill", d => d.relation === 'governed_by' ? '#fbbf24' : '#38bdf8')
+        .attr("opacity", 0.75);
+
+      nodeSel = nodeLayer
+        .selectAll("g")
+        .data(visibleNodes, d => d.id)
+        .join(
+          enter => {
+            const grp = enter.append("g")
+              .style("cursor", "pointer")
+              .call(d3.drag()
+                .on("start", (event, d) => {
+                  if (!event.active) simulation.alphaTarget(0.3).restart();
+                  d.fx = d.x; d.fy = d.y;
+                })
+                .on("drag", (event, d) => { d.fx = event.x; d.fy = event.y; })
+                .on("end", (event, d) => {
+                  if (!event.active) simulation.alphaTarget(0);
+                  d.fx = null; d.fy = null;
+                }))
+              .on("click", (event, d) => selectNode(d.id, true));
+
+            grp.append("circle")
+              .attr("r", d => {
+                const base = d.depth_zone === 'abyssal' ? 9 : (d.kind === 'class' ? 8 : 6);
+                const prBoost = Math.min(8, (d.pagerank_score || 0) * 22);
+                return base + prBoost;
+              })
+              .attr("fill", nodeColor);
+
+            grp.append("text")
+              .text(d => d.name)
+              .attr("x", 11)
+              .attr("y", 3)
+              .attr("fill", "#e2e8f0")
+              .attr("font-size", "10px")
+              .attr("pointer-events", "none");
+
+            return grp;
+          }
+        );
+
+      nodeSel.select("circle")
+        .attr("stroke", d => d.id === selectedNodeId ? "#38bdf8" : (d.is_bridge ? "#fbbf24" : "#fff"))
+        .attr("stroke-width", d => d.id === selectedNodeId ? 3 : (d.is_bridge ? 2.2 : 1));
+
+      simulation.nodes(visibleNodes);
+      simulation.force("link", d3.forceLink(simEdges).id(d => d.id).distance(70));
+      simulation.alpha(0.6).restart();
+    }
 
     function formatMarkdownWithWikilinks(text) {
       if (!text) return '';
-      const escaped = text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      const escaped = escapeHtml(text);
       return escaped.replace(/\[\[([a-zA-Z0-9_#./:-]+)\]\]/g, (_, targetId) => {
-        return `<span class="wikilink-chip" onclick="window.__selectNode('${targetId}')">[[${targetId}]]</span>`;
+        return `<span class="wikilink-chip" data-node-id="${escapeHtml(targetId)}">[[${escapeHtml(targetId)}]]</span>`;
       });
     }
+
+    // Event delegation for data-node-id clicks
+    document.addEventListener('click', e => {
+      const target = e.target.closest('[data-node-id]');
+      if (target) {
+        const id = target.getAttribute('data-node-id');
+        if (id) window.__selectNode(id);
+      }
+    });
 
     window.__selectNode = function(id) {
       if (nodeById.has(id)) {
@@ -578,9 +700,9 @@
         if (invs.length > 0) {
           invariantsHtml = `
             <div style="background: rgba(244,63,94,0.1); border: 1px solid rgba(244,63,94,0.35); padding: 10px; border-radius: 8px; margin-bottom: 12px;">
-              <div style="font-size: 0.72rem; font-weight:700; color:#fda4af; text-transform:uppercase; margin-bottom:4px;">🛑 Invariants (${d.enforcement || 'advisory'})</div>
+              <div style="font-size: 0.72rem; font-weight:700; color:#fda4af; text-transform:uppercase; margin-bottom:4px;">🛑 Invariants (${escapeHtml(d.enforcement || 'advisory')})</div>
               <ul style="padding-left:16px; font-size:0.78rem; color:#fecdd3;">
-                ${invs.map(i => `<li>${i}</li>`).join('')}
+                ${invs.map(i => `<li>${escapeHtml(i)}</li>`).join('')}
               </ul>
             </div>`;
         }
@@ -589,18 +711,18 @@
       const outHtml = outgoing.slice(0, 15).map(e => {
         const tId = getEdgeTargetId(e);
         const tNode = nodeById.get(tId);
-        return `<div class="rel-card" onclick="window.__selectNode('${tId}')">
-          <span style="font-family:monospace; color:#38bdf8;">${e.relation} &rarr;</span>
-          <span>${tNode ? tNode.name : tId}</span>
+        return `<div class="rel-card" data-node-id="${escapeHtml(tId)}">
+          <span style="font-family:monospace; color:#38bdf8;">${escapeHtml(e.relation)} &rarr;</span>
+          <span>${escapeHtml(tNode ? tNode.name : tId)}</span>
         </div>`;
       }).join('');
 
       const inHtml = incoming.slice(0, 15).map(e => {
         const sId = getEdgeSourceId(e);
         const sNode = nodeById.get(sId);
-        return `<div class="rel-card" onclick="window.__selectNode('${sId}')">
-          <span>${sNode ? sNode.name : sId}</span>
-          <span style="font-family:monospace; color:#fbbf24;">&larr; ${e.relation}</span>
+        return `<div class="rel-card" data-node-id="${escapeHtml(sId)}">
+          <span>${escapeHtml(sNode ? sNode.name : sId)}</span>
+          <span style="font-family:monospace; color:#fbbf24;">&larr; ${escapeHtml(e.relation)}</span>
         </div>`;
       }).join('');
 
@@ -608,14 +730,14 @@
 
       document.getElementById('panel-content').innerHTML = `
         <div style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:6px;">
-          <span class="badge ${d.depth_zone}">${d.depth_zone} • ${d.kind}</span>
+          <span class="badge ${escapeHtml(d.depth_zone)}">${escapeHtml(d.depth_zone)} • ${escapeHtml(d.kind)}</span>
           ${d.enforcement === 'blocking' ? `<span class="badge blocking">BLOCKING</span>` : ''}
           ${d.is_bridge ? `<span class="badge abyssal">BRIDGE NODE</span>` : ''}
         </div>
-        <h2 style="font-size: 1.15rem; margin-bottom: 6px; word-break:break-all;">${d.name}</h2>
-        ${d.signature ? `<code style="display:block; background:#070b14; padding:7px 9px; border-radius:6px; font-size:0.74rem; color:#38bdf8; margin-bottom:10px; border:1px solid var(--border-panel);">${d.signature}</code>` : ''}
-        <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 10px;">${d.summary || 'No summary.'}</p>
-        ${d.file_path ? `<div style="font-size: 0.74rem; font-family:monospace; color: #94a3b8; margin-bottom: 12px;">📄 ${d.file_path}${d.line_start ? `:${d.line_start}-${d.line_end || d.line_start}` : ''}</div>` : ''}
+        <h2 style="font-size: 1.15rem; margin-bottom: 6px; word-break:break-all;">${escapeHtml(d.name)}</h2>
+        ${d.signature ? `<code style="display:block; background:#070b14; padding:7px 9px; border-radius:6px; font-size:0.74rem; color:#38bdf8; margin-bottom:10px; border:1px solid var(--border-panel);">${escapeHtml(d.signature)}</code>` : ''}
+        <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 10px;">${escapeHtml(d.summary || 'No summary.')}</p>
+        ${d.file_path ? `<div style="font-size: 0.74rem; font-family:monospace; color: #94a3b8; margin-bottom: 12px;">📄 ${escapeHtml(d.file_path)}${d.line_start ? `:${d.line_start}-${d.line_end || d.line_start}` : ''}</div>` : ''}
         ${invariantsHtml}
         ${outgoing.length > 0 ? `<div class="sidebar-title">Outgoing Edges (${outgoing.length})</div><div style="margin-bottom:12px;">${outHtml}</div>` : ''}
         ${incoming.length > 0 ? `<div class="sidebar-title">Backlinks / Callers (${incoming.length})</div><div style="margin-bottom:12px;">${inHtml}</div>` : ''}
@@ -650,54 +772,23 @@
       const container = document.getElementById('breadcrumbs');
       container.innerHTML = historyStack.slice(-8).map(id => {
         const n = nodeById.get(id);
-        return `<span class="crumb" onclick="window.__selectNode('${id}')">${n ? n.name : id}</span>`;
+        return `<span class="crumb" data-node-id="${escapeHtml(id)}">${escapeHtml(n ? n.name : id)}</span>`;
       }).join(' <span>&rsaquo;</span> ');
-    }
-
-    function applyVisibilityFilters() {
-      const q = document.getElementById('search-box').value.toLowerCase().trim();
-      const sonarGlob = document.getElementById('sonar-glob-input').value.toLowerCase().trim();
-      const hopMode = document.getElementById('hop-mode').value;
-
-      let egoSet = null;
-      if (selectedNodeId && (hopMode === '1' || hopMode === '2')) {
-        egoSet = new Set([selectedNodeId]);
-        const maxHops = parseInt(hopMode, 10);
-        for (let step = 0; step < maxHops; step++) {
-          const current = Array.from(egoSet);
-          for (const e of DATA.edges) {
-            const u = getEdgeSourceId(e);
-            const v = getEdgeTargetId(e);
-            if (current.includes(u)) egoSet.add(v);
-            if (current.includes(v)) egoSet.add(u);
-          }
-        }
-      }
-
-      node.style('opacity', d => {
-        if (activeKindFilter !== 'all' && d.kind !== activeKindFilter) return 0.1;
-        if (egoSet && !egoSet.has(d.id)) return 0.1;
-        if (q && !(d.name.toLowerCase().includes(q) || d.id.toLowerCase().includes(q) || (d.summary || '').toLowerCase().includes(q))) return 0.12;
-        if (sonarGlob) {
-          const fp = (d.file_path || '').toLowerCase();
-          const applies = (d.applies_to_json || '').toLowerCase();
-          if (!fp.includes(sonarGlob.replace(/\*/g, '')) && !applies.includes(sonarGlob.replace(/\*/g, ''))) return 0.12;
-        }
-        return 1;
-      });
     }
 
     function renderTree() {
       const tree = document.getElementById('node-tree');
+      const q = document.getElementById('search-box').value.toLowerCase().trim();
       const sorted = [...DATA.nodes]
         .filter(n => activeKindFilter === 'all' || n.kind === activeKindFilter)
+        .filter(n => !q || n.name.toLowerCase().includes(q) || n.id.toLowerCase().includes(q) || (n.summary || '').toLowerCase().includes(q))
         .sort((a, b) => (b.pagerank_score || 0) - (a.pagerank_score || 0))
-        .slice(0, 80);
+        .slice(0, 100);
 
       tree.innerHTML = sorted.map(n => `
-        <div class="tree-item ${n.id === selectedNodeId ? 'selected' : ''}" onclick="window.__selectNode('${n.id}')">
-          <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${n.name}</span>
-          <span style="font-size:0.65rem; font-family:monospace; color:var(--text-muted);">${n.kind}</span>
+        <div class="tree-item ${n.id === selectedNodeId ? 'selected' : ''}" data-node-id="${escapeHtml(n.id)}">
+          <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${escapeHtml(n.name)}</span>
+          <span style="font-size:0.65rem; font-family:monospace; color:var(--text-muted);">${escapeHtml(n.kind)}</span>
         </div>
       `).join('');
     }
@@ -712,7 +803,10 @@
       };
     });
 
-    document.getElementById('search-box').addEventListener('input', applyVisibilityFilters);
+    document.getElementById('search-box').addEventListener('input', () => {
+      renderTree();
+      applyVisibilityFilters();
+    });
     document.getElementById('sonar-glob-input').addEventListener('input', applyVisibilityFilters);
     document.getElementById('hop-mode').addEventListener('change', applyVisibilityFilters);
 
@@ -737,6 +831,7 @@
     };
 
     renderTree();
+    applyVisibilityFilters();
   </script>
 </body>
 </html>

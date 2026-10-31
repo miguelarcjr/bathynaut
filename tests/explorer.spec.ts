@@ -34,4 +34,23 @@ describe('Deep-Sea Visual Explorer Exporter', () => {
     expect(html).toContain('ADR-001');
     expect(html).toContain('governed_by');
   });
+
+  it('should safely escape </script> tags and $ replacement patterns inside code_excerpt', () => {
+    upsertNode(db, {
+      id: 'fn:xss-and-dollar',
+      depth_zone: 'twilight',
+      kind: 'function',
+      name: 'unsafeExcerpt',
+      code_excerpt: `const html = "</script><script>alert('broken')</script>"; const rgx = "$& $' $\`";`
+    });
+
+    const exportedPath = exportExplorerHTML(db, testOut);
+    const html = fs.readFileSync(exportedPath, 'utf-8');
+
+    // Only 2 closing </script> tags should exist in the entire HTML (d3 script + main script)
+    const closingScripts = html.match(/<\/script>/gi) || [];
+    expect(closingScripts.length).toBe(2);
+    expect(html).toContain('\\u003c/script\\u003e');
+    expect(html).toContain("$\\u0026 $' $`");
+  });
 });

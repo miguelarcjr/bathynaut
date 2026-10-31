@@ -1,4 +1,5 @@
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { detectInstalledAgents } from '../../installer/detector.js';
 import { injectRulesFile, injectMCPConfig, injectAgentHooks } from '../../installer/injector.js';
 import { scaffoldMemoryVault } from '../../installer/vault-scaffold.js';
@@ -16,7 +17,7 @@ export async function runInitCommand(projectRoot: string): Promise<void> {
 
   // 2. Detect Agents and Inject Rules, MCP Configs & Lifecycle Hooks (with safe backups in .bathynaut/backups)
   const agents = detectInstalledAgents(projectRoot);
-  const binPath = path.resolve('dist/cli/main.js');
+  const binPath = fileURLToPath(new URL('../main.js', import.meta.url));
 
   for (const ag of agents) {
     console.log(`🤖 Configuring agent harness: ${ag.name}`);

@@ -58,9 +58,16 @@ export function exportExplorerHTML(db: Database, outputPath: string): string {
     templateContent = '<html><body><h1>Bathynaut Explorer</h1></body></html>';
   }
 
+  const safeJson = JSON.stringify(payload)
+    .replace(/</g, '\\u003c')
+    .replace(/>/g, '\\u003e')
+    .replace(/&/g, '\\u0026')
+    .replace(/\u2028/g, '\\u2028')
+    .replace(/\u2029/g, '\\u2029');
+
   const outputHtml = templateContent.replace(
     '/*__BATHYNAUT_DATA__*/ { nodes: [], edges: [] }',
-    JSON.stringify(payload)
+    () => safeJson
   );
 
   const outputDir = path.dirname(outputPath);
