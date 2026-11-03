@@ -16,7 +16,7 @@ const program = new Command();
 
 program
   .name('bathynaut')
-  .description('The Unified Oceanic Cognitive Architecture & Memory Harness for AI Coding Agents (v0.2 SOTA)')
+  .description('Local AST code graph, topological analyzer, and ADR/Zettelkasten memory server (MCP) for AI coding agents')
   .version('0.2.0');
 
 program
@@ -88,7 +88,7 @@ program
 
 program
   .command('doctor')
-  .description('Run the 5D graph health audit (orphans, broken edges, Stale ADRs, untested God Nodes, pending raw/)')
+  .description('Run graph and memory lint diagnostics (orphans, broken edges, stale ADRs, untested God Nodes, pending raw/)')
   .option('-d, --dir <path>', 'Project root directory', process.cwd())
   .action((opts) => {
     const projectRoot = path.resolve(opts.dir);

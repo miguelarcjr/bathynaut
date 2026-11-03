@@ -141,7 +141,7 @@ export function generateMOCIndex(memoryRoot: string, db: Database): void {
     }
 
     const lines: string[] = [
-      '# Master Map of Content (MOC) — Bathynaut SOTA',
+      '# Master Map of Content (MOC) — Bathynaut',
       `> Auto-updated on: ${new Date().toISOString().split('T')[0]} | Total notes: ${abyssalNodes.length}`,
       ''
     ];

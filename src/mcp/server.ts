@@ -34,7 +34,7 @@ export function createMCPServer(
       tools: [
         {
           name: 'bathynaut_sonar',
-          description: 'Pre-Edit Acoustic Radar v0.2 SOTA: Returns AST call blast radius, execution flows, risk score, test coverage, blocking invariants, and governing ADRs/incidents in 1 call within token_budget.',
+          description: 'Pre-Edit Impact Analysis: Returns AST call blast radius, execution flows, risk score, test coverage, blocking invariants, and governing ADRs/incidents within token_budget.',
           inputSchema: {
             type: 'object',
             properties: {
@@ -136,7 +136,7 @@ export function createMCPServer(
         },
         {
           name: 'bathynaut_lint',
-          description: '5D Graph Health Audit: Detects orphan nodes, broken edges, Stale ADRs (governed code modified), untested God Nodes, and uncompiled raw files in raw/.',
+          description: 'Graph & Memory Lint: Detects orphan nodes, broken edges, stale ADRs (governed code modified), untested God Nodes, and uncompiled raw files in raw/.',
           inputSchema: {
             type: 'object',
             properties: {

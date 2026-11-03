@@ -20,7 +20,7 @@ export function scaffoldMemoryVault(projectRoot: string): string {
 
   const activeContextPath = path.join(memoryDir, 'activeContext.md');
   if (!fs.existsSync(activeContextPath)) {
-    fs.writeFileSync(activeContextPath, `# Active Session Context (Bathynaut v0.2 SOTA)
+    fs.writeFileSync(activeContextPath, `# Active Session Context (Bathynaut)
 > Initialized at: ${new Date().toISOString()}
 
 ## Project Summary
@@ -34,7 +34,7 @@ Repository equipped with the Bathynaut cognitive harness (AST Call Graph + Louva
 
   const indexPath = path.join(memoryDir, 'index.md');
   if (!fs.existsSync(indexPath)) {
-    fs.writeFileSync(indexPath, `# Master Map of Content (MOC) — Bathynaut SOTA
+    fs.writeFileSync(indexPath, `# Master Map of Content (MOC) — Bathynaut
 > Auto-generated. CoALA Zettelkasten Vault interlinked with AST.
 
 ## DECISIONS (0)

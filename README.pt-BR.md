@@ -1,103 +1,223 @@
-<div align="center">
+# Bathynaut
 
-# 🌊 Bathynaut
+**Grafo AST de código, analisador topológico e servidor de memória ADR/Zettelkasten local (MCP) para agentes de IA.**
 
-### Arquitetura Cognitiva Oceânica Unificada, Grafo de Código & Memória Causal Zettelkasten para Agentes de IA
+[English](README.md) | [Português (Brasil)](README.pt-BR.md)
 
-<p align="center">
-  <a href="README.md">English</a> |
-  <a href="README.pt-BR.md"><b>Português (Brasil)</b></a>
-</p>
+[![Version 0.2.0](https://img.shields.io/badge/version-0.2.0-0284c7?style=flat-square)](https://github.com/miguelarc/bathynaut)
+[![License: MIT](https://img.shields.io/badge/license-MIT-64748b?style=flat-square)](LICENSE)
+[![Node.js >= 18](https://img.shields.io/badge/node-%3E%3D18%20(22%2B%20native%20sqlite)-16a34a?style=flat-square)](https://nodejs.org)
+[![TypeScript 5.6](https://img.shields.io/badge/TypeScript-5.6-2563eb?style=flat-square)](https://www.typescriptlang.org)
+[![MCP Stdio](https://img.shields.io/badge/MCP-stdio-7c3aed?style=flat-square)](https://modelcontextprotocol.io)
 
-<p align="center">
-  <a href="https://github.com/miguelarc/bathynaut"><img src="https://img.shields.io/badge/version-0.2.0--SOTA-00d2ff?style=flat-square&labelColor=0a192f" alt="Version 0.2.0 SOTA"></a>
-  <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/License-MIT-f59e0b?style=flat-square&labelColor=0a192f" alt="License: MIT"></a>
-  <a href="https://nodejs.org"><img src="https://img.shields.io/badge/Node.js-%3E%3D18%20%7C%2022%2B%20native%20sqlite-10b981?style=flat-square&labelColor=0a192f" alt="Node >= 18"></a>
-  <a href="https://www.typescriptlang.org"><img src="https://img.shields.io/badge/TypeScript-5.6-3b82f6?style=flat-square&labelColor=0a192f" alt="TypeScript 5.6"></a>
-  <a href="https://modelcontextprotocol.io"><img src="https://img.shields.io/badge/MCP-Stdio%20Native-8b5cf6?style=flat-square&labelColor=0a192f" alt="MCP Compatible"></a>
-  <img src="https://img.shields.io/badge/Custo%20de%20API-%240%20(100%25%20Local)-22c55e?style=flat-square&labelColor=0a192f" alt="Zero API Cost">
-</p>
-
-<p align="center">
-  <strong>Pare de deixar seu agente de código se afogar em tokens ou sofrer amnésia arquitetural entre sessões.</strong><br>
-  O Bathynaut unifica um <b>Grafo de Chamadas e Imports AST (Tree-sitter WASM)</b>, <b>Clusterização Topológica Louvain + PageRank</b> e um <b>Cofre de Memória Causal Zettelkasten CoALA</b> (ADRs, Incidentes, Padrões, Entidades e Invariantes) em <b>um único arquivo SQLite local (<code>ocean.db</code>)</b> e <b>um único servidor MCP</b>.
-</p>
-
-<p align="center">
-  <sub>Funciona nativamente com <b>Antigravity</b> · <b>Claude Code</b> · <b>Cursor</b> · <b>Windsurf</b> · <b>GitHub Copilot</b> · <b>Gemini CLI</b> · <b>OpenCode</b> · <b>Codex</b></sub>
-</p>
-
-</div>
+O Bathynaut indexa a árvore sintática abstrata do repositório (via `web-tree-sitter` WASM), calcula a topologia de módulos (clusterização Louvain e centralidade PageRank) e conecta símbolos de código-fonte diretamente a registros de decisão arquitetural (ADRs), incidentes e padrões armazenados em Markdown puro. Tudo reside em um único banco SQLite local (`.bathynaut/ocean.db`) exposto via Model Context Protocol (MCP), sem chamadas a APIs externas.
 
 ---
 
-## 🤖 Deixe Seu Agente de IA Instalar e Configurar Tudo Sozinho (Zero-Touch)
+## Sumário
 
-Não quer configurar nada manualmente? Copie e cole o bloco abaixo diretamente no **Antigravity**, **Claude Code**, **Cursor**, **Windsurf**, **GitHub Copilot** ou **OpenCode**. O próprio agente instalará o Bathynaut, configurará o servidor MCP, os hooks, as regras e as skills, construirá o grafo AST + Zettelkasten e mapeará a arquitetura do seu projeto automaticamente:
-
-<details open>
-<summary><b>📋 Prompt de Auto-Configuração (Copie e Cole no seu Agente)</b></summary>
-
-```markdown
-Quero que você instale, configure e inicialize o **Bathynaut** (Unified Oceanic Cognitive Architecture & Memory Harness) neste repositório de forma 100% autônoma seguindo os passos abaixo:
-
-1. **Inicialização em 1 Comando**:
-   - Execute `npx bathynaut init -d "."` na raiz deste repositório (ou, caso estejamos usando um clone local do Bathynaut, faça o build com `npm run build` e execute `node <caminho-do-bathynaut>/dist/cli/main.js init -d "."`).
-
-2. **Verificação da Infraestrutura Criada**:
-   Confirme que o comando `init` gerou e configurou automaticamente:
-   - O cofre Zettelkasten CoALA em `.bathynaut/memory/` (`activeContext.md`, `index.md`, `wiki/decisions`, `wiki/incidents`, `wiki/patterns`, `wiki/entities`, `wiki/architecture`, `raw/`).
-   - O banco de grafo unificado `.bathynaut/ocean.db` e o explorador visual interativo `.bathynaut/bathynaut.html`.
-   - As regras nativas com Context Includes (`AGENTS.md`, `GEMINI.md`, `.agents/rules/bathynaut.md`, `CLAUDE.md`, `.cursor/rules/bathynaut.mdc`).
-   - As 6 Cognitive Skills em `.agents/skills/bathynaut-*`, `.claude/skills/bathynaut-*` e `.cursor/skills/bathynaut-*`.
-   - Os Agent Lifecycle Hooks (`SessionStart` e `PreToolUse`) em `.agents/hooks.json`, `.claude/settings.json` e `.cursor/hooks.json`, além dos Git hooks (`post-merge`, `post-commit`, `post-checkout`).
-
-3. **Auditoria de Saúde e Mapeamento Arquitetural Inicial**:
-   - Execute `npx bathynaut doctor` (ou chame as tools MCP `bathynaut_lint({})` e `bathynaut_dive({})`) para inspecionar as Comunidades Louvain, os God Nodes (PageRank), os Execution Flows, as `surprising_connections` e os `knowledge_gaps`.
-   - Liste todos os arquivos criados/modificados e me apresente um resumo executivo da topologia descoberta neste projeto.
-```
-
-</details>
+- [Visão Geral e Objetivos de Projeto](#visão-geral-e-objetivos-de-projeto)
+- [Início Rápido](#início-rápido)
+- [Prompt de Auto-Configuração para Agentes](#prompt-de-auto-configuração-para-agentes)
+- [Arquitetura](#arquitetura)
+- [Vault de Memória e Relações Semânticas](#vault-de-memória-e-relações-semânticas)
+- [Referência das Ferramentas MCP](#referência-das-ferramentas-mcp)
+- [Integração com Agentes (Rules, Skills e Hooks)](#integração-com-agentes-rules-skills-e-hooks)
+- [Explorador Visual do Grafo (`bathynaut.html`)](#explorador-visual-do-grafo-bathynauthtml)
+- [Referência da CLI](#referência-da-cli)
+- [Perguntas Frequentes (FAQ)](#perguntas-frequentes-faq)
+- [Licença](#licença)
 
 ---
 
-## ⚡ Início Rápido (30 Segundos)
+## Visão Geral e Objetivos de Projeto
+
+Agentes de codificação costumam enfrentar duas limitações estruturais em repositórios médios e grandes:
+1. **Falta de visibilidade estrutural**: Buscas textuais (`grep`) ou leitura de trechos isolados não revelam chamadores transitivos, fluxos de execução ou cobertura de testes antes de uma edição.
+2. **Sessões sem memória causal**: Decisões arquiteturais, regressões passadas e invariantes de domínio documentados em Markdown raramente ficam conectados às funções e arquivos específicos que governam.
+
+Ferramentas existentes normalmente resolvem apenas um lado desse problema — ou constroem um grafo AST de chamadas (muitas vezes exigindo ambientes Python ou expondo dezenas de tools MCP fragmentadas) ou gerenciam notas em Markdown sem integração com a AST do código.
+
+| Dimensão | Grafos Apenas de AST (`code-review-graph`, `graphify`) | Servidores de Notas Markdown | Bathynaut |
+| :--- | :--- | :--- | :--- |
+| **Foco Principal** | Grafo de chamadas/imports, clusters, blast radius | ADRs, notas de sessão, wikilinks | Grafo AST unificado + memória estruturada ADR/Zettelkasten |
+| **Runtime** | Python (`uv`/`pipx`) ou binários nativos | Node.js ou Python | Node.js / TypeScript (`web-tree-sitter` WASM + SQLite) |
+| **Superfície MCP** | 10–28 tools | 4–8 tools | 7 tools consolidadas (`sonar`, `dive`, `path`, `recall`, `log_adr`, `checkpoint`, `lint`) |
+| **Vínculo Código ↔ Decisão** | Nenhum | Apenas globs de caminho de arquivo | Globs (`applies_to`), lista explícita de `symbols` e menções inline `` `simbolo()` `` |
+| **Detecção de Defasagem** | Reindexação de AST | Manual | Marca ADRs como `needs_review` quando o SHA-256 da função governada muda |
+
+---
+
+## Início Rápido
 
 ```bash
 cd seu-projeto
 npx bathynaut init
 ```
 
-Em um único comando, o `bathynaut init`:
-1. **Cria o Cofre Zettelkasten CoALA** (`.bathynaut/memory/` — ou adota automaticamente um cofre `.agents/memory/` já existente) com 5 categorias cognitivas e cores pré-configuradas para o Obsidian Graph View (`.obsidian/graph.json`).
-2. **Detecta e Configura 7 Agentes de IA** (**Antigravity**, **Claude Code**, **Cursor**, **Windsurf**, **GitHub Copilot**, **Gemini CLI**, **OpenCode**), criando backups `.bak` seguros em `.bathynaut/backups/` antes de tocar qualquer arquivo.
-3. **Instala 6 Skills Auto-Descobertas e Lifecycle Hooks** (`SessionStart` para injetar a memória quente da sessão e `PreToolUse` para proteger arquivos governados por ADRs `blocking`).
-4. **Constrói o Grafo Unificado de Código + Memória (`ocean.db`)** via `web-tree-sitter` (WASM) com resolução de símbolos e imports cross-file em dois passos, rastreia **Execution Flows**, calcula **PageRank God Nodes** e **Coesão Louvain**, e exporta o explorador IDE de 3 colunas (`.bathynaut/bathynaut.html`).
+O comando `bathynaut init` executa quatro etapas:
+1. **Inicializa o vault de memória em Markdown** em `.bathynaut/memory/` (ou adota automaticamente um diretório `.agents/memory/` já existente).
+2. **Configura os clientes de IA detectados** (Antigravity, Claude Code, Cursor, Windsurf, GitHub Copilot, Gemini CLI, OpenCode), criando cópias de segurança `.bak` em `.bathynaut/backups/` antes de modificar qualquer arquivo.
+3. **Instala skills e hooks de ciclo de vida** (`SessionStart` para contexto de sessão, `PreToolUse` para alertar sobre invariantes ativos nos arquivos editados, além de hooks Git `post-commit`/`post-merge`).
+4. **Indexa o repositório em `.bathynaut/ocean.db`** e exporta o visualizador interativo em `.bathynaut/bathynaut.html`.
+
+### Tarefas Comuns
+
+| Objetivo | Comando no Terminal | Prompt / Skill no Agente |
+| :--- | :--- | :--- |
+| Inicializar um repositório | `npx bathynaut init` | *"Execute `bathynaut init` neste repositório"* |
+| Sincronizar arquivos modificados incrementalmente | `npx bathynaut map` | Automático nas chamadas MCP e hooks Git |
+| Verificar blast radius e invariantes de um diff | `npx bathynaut review` | *"Use `bathynaut-review-changes` para revisar meu diff atual"* |
+| Abrir o visualizador local D3.js no navegador | `npx bathynaut explore` | *"Execute `npx bathynaut explore`"* |
+| Mapear arquitetura e lacunas de documentação | — | *"Execute a skill `bathynaut-map-project`"* |
+| Compilar rascunhos de `raw/` em notas estruturadas | — | *"Execute `bathynaut-wiki-compile`"* |
+| Auditar integridade do grafo (órfãos, links quebrados, ADRs defasadas) | `npx bathynaut doctor` | *"Execute `bathynaut-wiki-lint`"* |
+| Salvar o estado da sessão em `activeContext.md` | — | *"Execute `bathynaut-session-checkpoint`"* |
+| Remover rules, hooks e configs MCP injetados | `npx bathynaut disconnect` | *"Execute `npx bathynaut disconnect`"* |
 
 ---
 
-## 🏆 Por que o Bathynaut? (Comparação com o Ecossistema)
+## Prompt de Auto-Configuração para Agentes
 
-| Capacidade | `zk-wiki-mcp` | `code-review-graph` | `graphify` | `graphicle` | **🌊 Bathynaut SOTA** |
-| :--- | :---: | :---: | :---: | :---: | :---: |
-| **Runtime & Instalação Zero-Friction** | TypeScript | Python 3.10+ (`uv`/`pipx`) | Python 3.10+ | Binário Rust | **100% TypeScript / Node.js (`npx`, WASM + `better-sqlite3` / fallback `node:sqlite`)** |
-| **Footprint de Tools MCP (Overhead de Prompt)** | 5 tools | 28 tools | 10 tools | 8 tools | **7 Tools Ortogonais de Alta Densidade (`sonar`, `dive`, `path`, `recall`, `log_adr`, `checkpoint`, `lint`)** |
-| **Resolução AST Cross-File (Calls & Imports)** | ❌ Não | ✅ Forte | ⚠️ Parcial | ✅ Forte | **✅ Two-Pass Symbol & Import Linker (`EXTRACTED` / `INFERRED`)** |
-| **Rastreamento de Execution Flows** | ❌ Não | ✅ `flows` | ❌ Não | ❌ Não | **✅ Execution Flows com Score de Criticidade + `flow_memberships`** |
-| **Blast Radius por Linha de Git Diff + Risk Score** | ❌ Não | ✅ Sim | ⚠️ PR básico | ✅ Sim | **✅ Hunk Mapping `git diff --unified=0` + Risk Score `[0..1]` + Funções Sem Teste** |
-| **Topologia Macro, Drift & Knowledge Gaps** | ❌ Não | ⚠️ Básico | ✅ Forte | ✅ Forte | **✅ Coesão Louvain + Bridge Nodes + `surprising_connections` + `knowledge_gaps`** |
-| **Memória Causal (CoALA + Zettelkasten + ADRs)** | ✅ Forte (4 cats) | ❌ Não | ⚠️ Wiki plana | ⚠️ Notas planas | **✅ Cofre CoALA 5 Categorias + 10 Arestas Semânticas Bidirecionais + Dual-Vault** |
-| **Mutação Física de `.md` em `supersedes`** | ✅ Sim | ❌ Não | ❌ Não | ❌ Não | **✅ Reescreve o `.md` Antigo no Disco (`status: superseded` + `superseded_by`) + SQLite** |
-| **Upsert Declarativo (`id`), `sources` (`raw/`) & Batch `ids`** | ✅ Sim | ❌ Não | ❌ Não | ❌ Não | **✅ Paridade Total (`id`, `sources`, `uncompiled_raw_sources`, leitura em lote `ids`)** |
-| **Invariantes Executáveis & Guardião `PreToolUse`** | ❌ Não | ❌ Não | ❌ Não | ❌ Não | **✅ `blocking \| warning \| advisory` + Hook Guard `PreToolUse` em `<15ms`** |
-| **Tripla Ancoragem Código ↔ ADR & Stale ADR** | ⚠️ Só Glob | ❌ Não | ❌ Não | ⚠️ Só Símbolo | **✅ Globs `applies_to` + `symbols` Frontmatter + `` `backtick()` `` Inline + Flag SHA-256 Stale** |
-| **Preview de Rename Cross-File & Large Functions** | ❌ Não | ✅ `refactor_tool` | ❌ Não | ❌ Não | **✅ Preview `rename_symbol` Cross-File + Detector de `large_functions`** |
-| **Motor de Busca** | FTS5 BM25 | FTS5 | Substring | BM25 + RRF | **✅ Hybrid RRF (FTS5 BM25 + Identifier Splitting + PageRank + Backlinks + `cross_repo`)** |
-| **Visual Debugger IDE 3-Colunas (`bathynaut.html`)** | ✅ 3-Colunas | ❌ Não | ⚠️ 1-Painel | ✅ Web App | **✅ IDE 3-Colunas (Simulador Sonar Glob + Partículas Animadas + Breadcrumbs + Health Modal)** |
+Se preferir que o próprio agente de IA instale e valide o Bathynaut no projeto, cole o bloco abaixo no chat do agente:
+
+<details>
+<summary><b>Prompt de Instalação para Agentes de IA</b></summary>
+
+```markdown
+Instale e inicialize o Bathynaut neste repositório seguindo estes passos:
+
+1. Inicialização:
+   - Execute `npx bathynaut init -d "."` na raiz do repositório (ou, a partir de um clone local do Bathynaut, compile com `npm run build` e execute `node <caminho-do-bathynaut>/dist/cli/main.js init -d "."`).
+
+2. Verificação da estrutura gerada:
+   - Vault de memória em `.bathynaut/memory/` (ou `.agents/memory/`) contendo `activeContext.md`, `index.md` e `wiki/{decisions,incidents,patterns,entities,architecture}`.
+   - Banco SQLite `.bathynaut/ocean.db` e visualizador HTML `.bathynaut/bathynaut.html`.
+   - Regras do agente (`AGENTS.md`, `GEMINI.md`, `CLAUDE.md`, `.cursor/rules/bathynaut.mdc`), skills (`.agents/skills/bathynaut-*`) e hooks.
+
+3. Diagnóstico inicial:
+   - Execute `npx bathynaut doctor` (ou chame as tools `bathynaut_lint` e `bathynaut_dive`) e apresente um resumo dos módulos detectados, pontos de entrada e eventuais subsistemas sem documentação.
+```
+
+</details>
 
 ---
 
-## 🛠️ Referência da CLI
+## Arquitetura
+
+O Bathynaut modela o repositório em três camadas conectadas dentro de um único banco SQLite (`ocean.db`):
+
+```mermaid
+flowchart TD
+    subgraph TOPOLOGY["1. Topologia Macro (bathynaut_dive)"]
+        C["Comunidades Louvain e Coesão Intra-Cluster"]
+        G["Centralidade PageRank e Bridge Nodes"]
+        F["Fluxos de Execução (Entrypoint -> Folha)"]
+        D["Acoplamentos Entre Módulos e Lacunas de Documentação"]
+    end
+
+    subgraph AST_GRAPH["2. Grafo AST de Chamadas e Imports (bathynaut_sonar)"]
+        AST["Parser Tree-Sitter WASM (Assinaturas, Docstrings, SHA-256)"]
+        LINK["Resolução de Símbolos e Imports Entre Arquivos em 2 Passadas"]
+        BLAST["Mapeamento de Hunks Git Diff, Callers Downstream e Testes"]
+        REF["Preview de Renomeação de Símbolos Entre Arquivos"]
+    end
+
+    subgraph MEMORY["3. Memória Estruturada em Markdown (bathynaut_recall / bathynaut_log_adr)"]
+        CATS["5 Categorias: decisions | incidents | patterns | entities | architecture"]
+        INV["Invariantes (blocking | warning | advisory)"]
+        EDGES["10 Relações Semânticas Bidirecionais"]
+        STALE["Detecção de Defasagem via SHA-256 (needs_review = 1)"]
+    end
+
+    TOPOLOGY --> AST_GRAPH
+    AST_GRAPH -->|"globs applies_to + symbols + backticks inline"| MEMORY
+```
+
+---
+
+## Vault de Memória e Relações Semânticas
+
+### 1. Estrutura de Diretórios
+
+Os arquivos Markdown permanecem como a fonte da verdade em disco; o SQLite atua como índice relacional e FTS5 derivado:
+
+```text
+.bathynaut/
+├── ocean.db                  # Banco SQLite (nós, arestas, índice FTS5, comunidades, fluxos)
+├── bathynaut.html            # Explorador visual D3.js standalone
+├── backups/                  # Cópias .bak automáticas dos arquivos de configuração alterados
+└── memory/
+    ├── activeContext.md      # Estado de trabalho da sessão atual e próximas tarefas
+    ├── index.md              # Map of Content (MOC) gerado automaticamente
+    ├── raw/                  # Rascunhos, RFCs ou logs ainda não compilados
+    ├── .obsidian/graph.json  # Configuração opcional de cores para o Obsidian Graph View
+    └── wiki/
+        ├── decisions/        # Registros de Decisão Arquitetural (kind: adr)
+        ├── incidents/        # Postmortems e causas-raiz de bugs (kind: incident)
+        ├── patterns/         # Convenções reutilizáveis e anti-padrões (kind: pattern)
+        ├── entities/         # Modelos centrais de domínio (kind: entity)
+        └── architecture/     # Visão geral de subsistemas (kind: architecture)
+```
+
+### 2. Arestas Semânticas Bidirecionais
+
+As relações podem ser declaradas no frontmatter YAML (`edges: { mitigates: ["inc-001"] }`) ou inline no corpo Markdown (`mitigates:: [[inc-001]]`). Nas consultas via `bathynaut_recall`, tanto as arestas de saída quanto os backlinks inversos são retornados:
+
+| Relação Direta (`source -> target`) | Backlink Inverso (`target <- source`) | Finalidade |
+| :--- | :--- | :--- |
+| `supersedes` | `superseded_by` | Substitui uma ADR anterior e atualiza o `.md` antigo em disco (`status: superseded`). |
+| `mitigates` | `mitigated_by` | Conecta uma decisão ou padrão ao incidente/bug que ele previne. |
+| `caused_by` | `caused_incident` | Conecta um incidente à sua causa-raiz. |
+| `depends_on` | `required_by` | Declara dependência entre decisões, padrões ou módulos. |
+| `implements` | `implemented_by` | Conecta um módulo ou padrão concreto a uma especificação arquitetural. |
+| `tensions_with` | `tensions_with` | Registra um trade-off explícito entre duas decisões. |
+| `verified_by` | `verifies` | Conecta uma ADR ou invariante à suíte de testes correspondente. |
+| `mentions` | `mentioned_in` | Referência padrão `[[wikilink]]` com extração do parágrafo de contexto. |
+| `shares_scope_with` | `shares_scope_with` | Inferida automaticamente quando duas notas ativas possuem globs `applies_to` sobrepostos. |
+| `governed_by` | `governs` | Conecta símbolos da AST às notas/ADRs que os governam. |
+
+---
+
+## Referência das Ferramentas MCP
+
+| Tool | Parâmetros | Descrição |
+| :--- | :--- | :--- |
+| **`bathynaut_sonar`** | `files`, `git_diff`, `token_budget`, `project_path` | **Análise de impacto pré-edição**: Retorna `blocking_invariants`, `risk_score` (`0..1`), `affected_nodes`, `affected_flows`, `covering_tests`, `untested_functions`, `governing_adrs`, `known_incidents` e trechos de código ajustados ao `token_budget`. |
+| **`bathynaut_dive`** | `community_id`, `query`, `rename_symbol`, `new_name`, `project_path` | **Topologia macro**: Retorna `communities` Louvain (com `cohesion`), `top_god_nodes` (PageRank), `bridge_nodes`, `top_flows`, `surprising_connections`, `knowledge_gaps`, `large_functions` e `rename_preview`. |
+| **`bathynaut_path`** | `from`, `to`, `project_path` | **Caminho mais curto**: Busca em largura bidirecional entre quaisquer dois símbolos ou notas, indicando relações e nível de confiança (`EXTRACTED` / `INFERRED`). |
+| **`bathynaut_recall`** | `query`, `ids`, `category`, `include_superseded`, `cross_repo`, `limit`, `token_budget`, `project_path` | **Busca híbrida e leitura em lote**: Combina FTS5 BM25 (com separação de `camelCase`/`snake_case`), PageRank e backlinks de 1 salto via Reciprocal Rank Fusion (RRF), além de leitura direta por `ids`. |
+| **`bathynaut_log_adr`** | `id`, `title`, `summary`, `category`, `context`, `decision`, `enforcement`, `invariants`, `applies_to`, `symbols`, `sources`, `edges`, `project_path` | **Compilador de notas**: Cria ou atualiza uma nota Markdown validada, atualiza arquivos `.md` substituídos em disco, vincula símbolos AST no SQLite e regenera o `index.md`. |
+| **`bathynaut_checkpoint`** | `summary`, `active_tasks`, `decisions`, `project_path` | **Checkpoint de sessão**: Persiste o resumo do progresso atual e as próximas tarefas em `activeContext.md`. |
+| **`bathynaut_lint`** | `project_path` | **Auditoria de integridade**: Reporta `orphan_active_notes`, `dangling_links`, `stale_adrs`, `untested_god_nodes` e `uncompiled_raw_sources`. |
+
+---
+
+## Integração com Agentes (Rules, Skills e Hooks)
+
+| Cliente | Configuração MCP | Arquivo de Regras | Diretório de Skills | Hooks |
+| :--- | :--- | :--- | :--- | :--- |
+| **Antigravity** | `~/.gemini/antigravity/mcp_config.json` | `AGENTS.md`, `GEMINI.md`, `.agents/rules/bathynaut.md` | `.agents/skills/bathynaut-*/SKILL.md` | `.agents/hooks.json` (`SessionStart`, `PreToolUse`) |
+| **Claude Code** | `.mcp.json` + `~/.claude.json` | `CLAUDE.md` | `.claude/skills/bathynaut-*/SKILL.md` | `.claude/settings.json` (`SessionStart`, `PreToolUse`) |
+| **Cursor** | `.cursor/mcp.json` | `.cursor/rules/bathynaut.mdc` + `.cursorrules` | `.cursor/skills/bathynaut-*/SKILL.md` | `.cursor/hooks.json` (`beforeShellExecution`) |
+| **Windsurf** | `~/.codeium/windsurf/mcp_config.json` | `.windsurfrules` + `AGENTS.md` | `.agents/skills/bathynaut-*/SKILL.md` | Git `post-merge`, `post-commit`, `post-checkout` |
+| **GitHub Copilot** | `.vscode/mcp.json` | `.github/copilot-instructions.md` | `.agents/skills/bathynaut-*/SKILL.md` | Git `post-merge`, `post-commit`, `post-checkout` |
+| **Gemini CLI** | `.gemini/settings.json` | `GEMINI.md` | `.agents/skills/bathynaut-*/SKILL.md` | `.gemini/settings.json` (`SessionStart`, `PreToolUse`) |
+| **OpenCode** | `opencode.json` | `AGENTS.md` | `.agents/skills/bathynaut-*/SKILL.md` | Git `post-merge`, `post-commit`, `post-checkout` |
+
+---
+
+## Explorador Visual do Grafo (`bathynaut.html`)
+
+Execute `npx bathynaut explore` para gerar e abrir `.bathynaut/bathynaut.html` no navegador. Trata-se de um arquivo HTML autocontido com D3.js:
+
+- **Barra Lateral Esquerda**: Simulador de Glob do Sonar (digite um caminho de arquivo ou glob para destacar os símbolos e ADRs aplicáveis), filtros por tipo de nó e lista ordenada por PageRank.
+- **Canvas Central D3.js**: Layout de força dividido em três faixas horizontais (`Sunlight` para topologia/entrypoints, `Twilight` para símbolos AST e `Abyssal` para notas Markdown), com modos **Smart Overview (Top 250)**, **Extended Graph (Top 500)**, **1-Hop Ego**, **2-Hop Blast** e **All Nodes**.
+- **Painel Inspetor Direito**: Exibe metadados do nó, assinatura de funções, invariantes, chips clicáveis de `[[wikilinks]]`, arestas de saída, backlinks e código-fonte ou conteúdo Markdown.
+
+---
+
+## Referência da CLI
 
 ```bash
 npx bathynaut init [-d <dir>]
@@ -113,7 +233,19 @@ npx bathynaut serve [-d <dir>]
 
 ---
 
-## 📄 Licença
+## Perguntas Frequentes (FAQ)
+
+**O Bathynaut faz chamadas externas ou exige chave de API de LLM?**  
+Não. O parser (`web-tree-sitter`), a clusterização (`graphology`) e a busca textual (SQLite FTS5) rodam localmente na máquina.
+
+**E se o módulo nativo `better-sqlite3` não compilar no meu ambiente?**  
+O arquivo `src/storage/db.ts` utiliza automaticamente o módulo nativo `node:sqlite` (`DatabaseSync`, disponível no Node 22+) caso `better-sqlite3` não esteja disponível.
+
+**O Bathynaut suporta múltiplos repositórios ao mesmo tempo?**  
+Sim. O servidor MCP mantém um pool LRU (`ProjectContextPool`) e resolve o repositório alvo a partir de `project_path`, `workspace_hint` ou qualquer caminho absoluto informado nas chamadas.
+
+---
+
+## Licença
 
 MIT © Miguel Arc
-

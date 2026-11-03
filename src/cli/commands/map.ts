@@ -10,7 +10,7 @@ export async function runMapCommand(projectRoot: string, options: { force?: bool
   const dbPath = getDatabasePath(projectRoot);
   const db = initDatabase(dbPath);
   const { memoryRoot, vaultKind } = resolveMemoryVault(projectRoot);
-  console.log(`🌊 [Bathynaut v0.2 SOTA] Mapping depths in: ${projectRoot} (Vault: ${vaultKind})`);
+  console.log(`🌊 [Bathynaut v0.2.0] Indexing repository: ${projectRoot} (Vault: ${vaultKind})`);
 
   try {
     const syncStats = await ensureFreshGraph(projectRoot, db, memoryRoot, { force: options.force ?? true });
@@ -34,7 +34,7 @@ export async function runMapCommand(projectRoot: string, options: { force?: bool
     const outHtml = path.join(projectRoot, '.bathynaut', 'bathynaut.html');
     exportExplorerHTML(db, outHtml);
     console.log(`📊 D3.js Ocean Canvas exported to: ${outHtml}`);
-    console.log('✅ SOTA mapping completed successfully!');
+    console.log('✅ Graph indexing completed successfully!');
   } finally {
     db.close();
   }

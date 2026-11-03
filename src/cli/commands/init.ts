@@ -8,7 +8,7 @@ import { runHooksCommand } from './hooks.js';
 import { runMapCommand } from './map.js';
 
 export async function runInitCommand(projectRoot: string): Promise<void> {
-  console.log('🌊 [Bathynaut] Initializing Cognitive Architecture & Memory Harness v0.2 SOTA...');
+  console.log('🌊 [Bathynaut] Initializing code graph & memory vault (v0.2.0)...');
 
   // 1. Scaffold Memory Vault & Multi-Agent Cognitive Skills (.agents/skills, .claude/skills, .cursor/skills)
   const memoryDir = scaffoldMemoryVault(projectRoot);
