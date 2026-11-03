@@ -20,7 +20,7 @@ import {
 import { ProjectContextPool, resolveProjectRoot } from '../src/storage/pool.js';
 import { Database } from 'better-sqlite3';
 
-describe('Bathynaut Storage Engine v0.2 SOTA', () => {
+describe('Bathynaut Storage Engine v0.2', () => {
   let db: Database;
 
   beforeEach(() => {

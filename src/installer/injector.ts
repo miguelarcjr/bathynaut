@@ -155,12 +155,6 @@ export function injectRulesFile(filePath: string, projectRoot?: string): boolean
       existing = fs.readFileSync(filePath, 'utf-8');
     }
 
-    // Strip legacy Triad headers if migrating from ZK-Wiki + CRG + Graphify
-    existing = existing
-      .replace(/# Antigravity Knowledge Graph Integration \(Graphify, Code-Review-Graph & ZK-Wiki\)[\s\S]*?(?=<!-- BATHYNAUT:START -->|$)/g, '')
-      .replace(/# Protocolo SOTA de Memória Agêntica \(ZK-Wiki \+ CRG \+ Graphify\)[\s\S]*?(?=<!-- BATHYNAUT:START -->|$)/g, '')
-      .trim();
-
     if (existing.includes('<!-- BATHYNAUT:START -->')) {
       const updated = existing.replace(
         /<!-- BATHYNAUT:START -->[\s\S]*?<!-- BATHYNAUT:END -->/g,
@@ -321,15 +315,19 @@ export function injectAgentHooks(
       }
     }
 
-    const normalizedRoot = projectRoot.replace(/\\/g, '/');
+    const fmtPath = (pStr: string) => {
+      const norm = pStr.replace(/\\/g, '/');
+      return agentName !== 'antigravity' && /\s/.test(norm) ? `"${norm}"` : norm;
+    };
+    const normalizedRoot = fmtPath(projectRoot);
     const runner = serverBinPath
-      ? `node "${serverBinPath.replace(/\\/g, '/')}"`
+      ? `node ${fmtPath(serverBinPath)}`
       : 'npx --no-install bathynaut';
 
-    const sessionStartCmd = `${runner} hook-guard --agent ${agentName} --event SessionStart -d "${normalizedRoot}"`;
-    const preInvokeCmd = `${runner} hook-guard --agent ${agentName} --event PreInvocation -d "${normalizedRoot}"`;
-    const preToolCmd = `${runner} hook-guard --agent ${agentName} --event PreToolUse -d "${normalizedRoot}"`;
-    const postToolCmd = `${runner} hook-guard --agent ${agentName} --event PostToolUse -d "${normalizedRoot}"`;
+    const sessionStartCmd = `${runner} hook-guard --agent ${agentName} --event SessionStart -d ${normalizedRoot}`;
+    const preInvokeCmd = `${runner} hook-guard --agent ${agentName} --event PreInvocation -d ${normalizedRoot}`;
+    const preToolCmd = `${runner} hook-guard --agent ${agentName} --event PreToolUse -d ${normalizedRoot}`;
+    const postToolCmd = `${runner} hook-guard --agent ${agentName} --event PostToolUse -d ${normalizedRoot}`;
 
     if (agentName === 'antigravity') {
       if (config.hooks && !config['bathynaut-guard']) {
@@ -467,45 +465,3 @@ export function removeAgentHooks(hooksConfigPath: string): boolean {
   }
 }
 
-const LEGACY_TRIAD_SKILLS = [
-  'build-graph',
-  'explore-codebase',
-  'debug-issue',
-  'refactor-safely',
-  'review-changes',
-  'review-delta',
-  'review-pr',
-  'wiki-compile',
-  'wiki-lint',
-  'session-checkpoint',
-  'map-project',
-  'graphify'
-];
-
-/**
- * Cleans up leftover rules and skills from legacy Triad setups (graphify, code-review-graph, zk-wiki)
- * so the agent is never given conflicting instructions to call disabled MCP servers.
- */
-export function cleanupLegacyTriadArtifacts(projectRoot: string): void {
-  try {
-    const legacyRulePaths = [
-      path.join(projectRoot, '.agents', 'rules', 'graphify.md'),
-      path.join(projectRoot, '.agents', 'rules', 'code-review-graph.md'),
-      path.join(projectRoot, '.agents', 'rules', 'zk-wiki.md'),
-      path.join(projectRoot, '.agents', 'GEMINI.md')
-    ];
-    for (const p of legacyRulePaths) {
-      if (fs.existsSync(p)) {
-        backupFileIfExists(p, projectRoot);
-        fs.unlinkSync(p);
-      }
-    }
-
-    for (const skillName of LEGACY_TRIAD_SKILLS) {
-      const skillDir = path.join(projectRoot, '.agents', 'skills', skillName);
-      if (fs.existsSync(skillDir)) {
-        fs.rmSync(skillDir, { recursive: true, force: true });
-      }
-    }
-  } catch {}
-}

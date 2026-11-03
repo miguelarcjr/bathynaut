@@ -3,7 +3,7 @@ import { parseZettelkastenNote } from '../src/parsers/markdown/zettelkasten.js';
 import { INVERSE_RELATIONS } from '../src/parsers/markdown/edges.js';
 import { computeScopeSharingEdges } from '../src/parsers/markdown/scanner.js';
 
-describe('Zettelkasten CoALA SOTA Ontology & Semantic Edges', () => {
+describe('Zettelkasten CoALA Ontology & Semantic Edges', () => {
   it('should support all 5 CoALA categories (decisions, incidents, patterns, entities, architecture)', () => {
     const archMd = `---
 id: arch-001-camadas

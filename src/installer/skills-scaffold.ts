@@ -39,7 +39,7 @@ description: Compiles raw documents from .bathynaut/memory/raw/ (or .agents/memo
 
   'bathynaut-wiki-lint': `---
 name: bathynaut-wiki-lint
-description: Audits 5D graph health in Bathynaut (orphan_active_notes, dangling_links, stale_adrs, untested_god_nodes, uncompiled_raw_sources) and resolves inconsistencies.
+description: Audits graph and memory health in Bathynaut (orphan_active_notes, dangling_links, stale_adrs, untested_god_nodes, uncompiled_raw_sources) and resolves inconsistencies.
 ---
 
 # Graph Hygiene Workflow (Librarian Pass)

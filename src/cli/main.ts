@@ -123,7 +123,9 @@ program
   .option('-e, --event <event>', 'Hook event name (SessionStart | PreInvocation | PreToolUse | PostToolUse)', 'SessionStart')
   .option('-a, --agent <agent>', 'Target agent contract (antigravity | claude-code | cursor | gemini-cli)', 'antigravity')
   .action(async (opts) => {
-    const projectRoot = path.resolve(opts.dir);
+    const cleanedDir = String(opts.dir || process.cwd()).replace(/^["']+|["']+$/g, '');
+    let projectRoot = path.resolve(cleanedDir);
+    if (path.basename(projectRoot) === '.agents') projectRoot = path.dirname(projectRoot);
     const validEvents: HookEventName[] = ['SessionStart', 'PreInvocation', 'PreToolUse', 'PostToolUse'];
     const event: HookEventName = validEvents.includes(opts.event) ? opts.event : 'SessionStart';
     const agent: HookAgentKind = ['antigravity', 'claude-code', 'cursor', 'gemini-cli'].includes(opts.agent)

@@ -17,7 +17,7 @@ function computeRiskLevel(score: number): RiskLevel {
 }
 
 /**
- * Deterministic BFS Blast Radius & Risk Score Calculator v0.2 SOTA.
+ * Deterministic BFS Blast Radius & Risk Score Calculator.
  */
 export function calculateBlastRadius(
   db: Database,

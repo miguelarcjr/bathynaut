@@ -9,7 +9,7 @@ import { initDatabase, getDatabasePath } from '../src/storage/db.js';
 import { handleLogAdr } from '../src/mcp/tools/log-adr.js';
 import { resolveMemoryVault } from '../src/storage/pool.js';
 
-describe('Universal Multi-Agent Harness Installer v2 (Hooks, Skills, Rules, MCP Configs)', () => {
+describe('Universal Multi-Agent Harness Installer (Hooks, Skills, Rules, MCP Configs)', () => {
   let tmpRepo: string;
 
   beforeEach(() => {
@@ -29,21 +29,12 @@ describe('Universal Multi-Agent Harness Installer v2 (Hooks, Skills, Rules, MCP 
     } catch {}
   });
 
-  it('deve configurar Rules nativas (@[...] includes e .mdc), MCP Configs especificos por plataforma, 6 Skills e Lifecycle Hooks (SessionStart/PreToolUse)', async () => {
-    // Simula um repositorio Git real + artefatos legados da Triade para testar auto-limpeza
+  it('should configure native rules (@[...] includes and .mdc), platform MCP configs, 6 skills, and 4-stage lifecycle hooks', async () => {
     fs.mkdirSync(path.join(tmpRepo, '.git', 'hooks'), { recursive: true });
-    fs.mkdirSync(path.join(tmpRepo, '.agents', 'rules'), { recursive: true });
-    fs.writeFileSync(path.join(tmpRepo, '.agents', 'rules', 'graphify.md'), '# Legacy Graphify', 'utf-8');
-    fs.mkdirSync(path.join(tmpRepo, '.agents', 'skills', 'build-graph'), { recursive: true });
-    fs.writeFileSync(path.join(tmpRepo, '.agents', 'skills', 'build-graph', 'SKILL.md'), '# Legacy CRG', 'utf-8');
 
     await runInitCommand(tmpRepo);
 
-    // 0. Artefatos legados da Triade devem ter sido limpos
-    expect(fs.existsSync(path.join(tmpRepo, '.agents', 'rules', 'graphify.md'))).toBe(false);
-    expect(fs.existsSync(path.join(tmpRepo, '.agents', 'skills', 'build-graph'))).toBe(false);
-
-    // 1. Rules & Context Includes (AGENTS.md expande @[...], enquanto GEMINI.md e bathynaut.md evitam duplicacao)
+    // 1. Rules & Context Includes (AGENTS.md expands @[...], while GEMINI.md and bathynaut.md avoid duplicate expansion)
     const agentsMd = fs.readFileSync(path.join(tmpRepo, 'AGENTS.md'), 'utf-8');
     expect(agentsMd).toContain('@[Active Session Context](.bathynaut/memory/activeContext.md)');
     expect(agentsMd).toContain('@[Wiki Index](.bathynaut/memory/index.md)');
@@ -62,7 +53,7 @@ describe('Universal Multi-Agent Harness Installer v2 (Hooks, Skills, Rules, MCP 
     expect(cursorMdc).toContain('alwaysApply: true');
     expect(cursorMdc).toContain('globs: "**/*"');
 
-    // 2. MCP Configs por plataforma + pinagem de -d <projectRoot>
+    // 2. Platform MCP Configs with -d <projectRoot> pinning
     const vscodeMcp = JSON.parse(fs.readFileSync(path.join(tmpRepo, '.vscode', 'mcp.json'), 'utf-8'));
     expect(vscodeMcp.servers.bathynaut).toBeDefined();
     expect(vscodeMcp.servers.bathynaut.type).toBe('stdio');
@@ -77,7 +68,7 @@ describe('Universal Multi-Agent Harness Installer v2 (Hooks, Skills, Rules, MCP 
     expect(openCodeMcp.mcp.bathynaut.type).toBe('local');
     expect(openCodeMcp.mcp.bathynaut.enabled).toBe(true);
 
-    // 3. Skills descobertas pelos agentes (.agents/skills, .claude/skills, .cursor/skills)
+    // 3. Agent-discoverable Skills (.agents/skills, .claude/skills, .cursor/skills)
     const expectedSkills = [
       'bathynaut-map-project',
       'bathynaut-wiki-compile',
@@ -103,6 +94,7 @@ describe('Universal Multi-Agent Harness Installer v2 (Hooks, Skills, Rules, MCP 
     expect(agyHooks['bathynaut-guard'].PreInvocation.length).toBeGreaterThan(0);
     expect(agyHooks['bathynaut-guard'].PreToolUse[0].matcher).toBe('edit_file|write_file');
     expect(agyHooks['bathynaut-guard'].PostToolUse[0].matcher).toBe('edit_file|write_file');
+    expect(agyHooks['bathynaut-guard'].PreToolUse[0].hooks[0].command).not.toContain('\"');
 
     const claudeSettings = JSON.parse(fs.readFileSync(path.join(tmpRepo, '.claude', 'settings.json'), 'utf-8'));
     expect(claudeSettings.hooks.SessionStart.length).toBeGreaterThan(0);
@@ -115,17 +107,17 @@ describe('Universal Multi-Agent Harness Installer v2 (Hooks, Skills, Rules, MCP 
     expect(cursorHooks.hooks.beforeShellExecution.length).toBeGreaterThan(0);
     expect(cursorHooks.hooks.afterFileEdit.length).toBeGreaterThan(0);
 
-    // 5. Testa avaliacao real do Hook Guard (SessionStart + PreInvocation + PreToolUse com ADR blocking e Blast Radius)
+    // 5. Evaluate Hook Guard (SessionStart + PreInvocation + PreToolUse with blocking ADR and AST Blast Radius)
     const db = initDatabase(getDatabasePath(tmpRepo));
     const { memoryRoot } = resolveMemoryVault(tmpRepo);
     handleLogAdr(db, memoryRoot, {
       id: 'adr-001-idempotency-key',
       category: 'decisions',
-      title: 'Exigir Idempotency Key em Cobrancas',
-      context: 'Evitar cobranca duplicada em retries.',
-      decision: 'Toda chamada em payment.ts deve exigir idempotencyKey.',
+      title: 'Require Idempotency Key on Charges',
+      context: 'Prevent duplicate charges on retries.',
+      decision: 'Every call in payment.ts must require idempotencyKey.',
       enforcement: 'blocking',
-      invariants: ['Nunca processar cobranca sem idempotencyKey validada'],
+      invariants: ['Never process a charge without a validated idempotencyKey'],
       applies_to: ['src/payment.ts']
     });
     db.close();
@@ -138,7 +130,6 @@ describe('Universal Multi-Agent Harness Installer v2 (Hooks, Skills, Rules, MCP 
     expect(preInvokeGuard.injectSteps?.[0]).toHaveProperty('ephemeralMessage');
     expect(preInvokeGuard.hookSpecificOutput?.additionalContext).toContain('bathynaut_sonar');
 
-    // Se invocationNum > 1, PreInvocation nao deve poluir passos intermediarios
     const preInvokeStep2 = evaluateHookGuard(tmpRepo, 'PreInvocation', { invocationNum: 2 }, 'antigravity');
     expect(preInvokeStep2.injectSteps).toBeUndefined();
 
@@ -153,7 +144,7 @@ describe('Universal Multi-Agent Harness Installer v2 (Hooks, Skills, Rules, MCP 
     expect(preToolGuard.decision).toBe('allow');
     expect(preToolGuard.reason).toContain('AST Blast Radius:');
     expect(preToolGuard.reason).toContain('[BLOCKING] adr-001-idempotency-key');
-    expect(preToolGuard.reason).toContain('Nunca processar cobranca sem idempotencyKey validada');
+    expect(preToolGuard.reason).toContain('Never process a charge without a validated idempotencyKey');
 
     const claudePreTool = evaluateHookGuard(
       tmpRepo,
@@ -167,7 +158,7 @@ describe('Universal Multi-Agent Harness Installer v2 (Hooks, Skills, Rules, MCP 
     expect(claudePreTool.hookSpecificOutput?.permissionDecision).toBe('allow');
     expect(claudePreTool.hookSpecificOutput?.additionalContext).toContain('[BLOCKING] adr-001-idempotency-key');
 
-    // 6. Disconnect deve limpar regras, hooks e skills de agentes preservando o cofre .bathynaut/memory
+    // 6. Disconnect removes injected rules, hooks, and agent skills while preserving .bathynaut/memory
     runDisconnectCommand(tmpRepo);
     expect(fs.existsSync(path.join(tmpRepo, '.cursor', 'rules', 'bathynaut.mdc'))).toBe(false);
     expect(fs.existsSync(path.join(tmpRepo, '.agents', 'rules', 'bathynaut.md'))).toBe(false);
@@ -175,4 +166,3 @@ describe('Universal Multi-Agent Harness Installer v2 (Hooks, Skills, Rules, MCP 
     expect(fs.existsSync(path.join(tmpRepo, '.bathynaut', 'memory', 'wiki'))).toBe(true);
   });
 });
-

@@ -1,7 +1,7 @@
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { detectInstalledAgents } from '../../installer/detector.js';
-import { injectRulesFile, injectMCPConfig, injectAgentHooks, cleanupLegacyTriadArtifacts } from '../../installer/injector.js';
+import { injectRulesFile, injectMCPConfig, injectAgentHooks } from '../../installer/injector.js';
 import { scaffoldMemoryVault } from '../../installer/vault-scaffold.js';
 import { scaffoldCognitiveSkills } from '../../installer/skills-scaffold.js';
 import { runHooksCommand } from './hooks.js';
@@ -10,8 +10,7 @@ import { runMapCommand } from './map.js';
 export async function runInitCommand(projectRoot: string): Promise<void> {
   console.log('🌊 [Bathynaut] Initializing code graph & memory vault (v0.2.0)...');
 
-  // 1. Clean legacy Triad artifacts & Scaffold Memory Vault + Multi-Agent Cognitive Skills
-  cleanupLegacyTriadArtifacts(projectRoot);
+  // 1. Scaffold Memory Vault + Multi-Agent Cognitive Skills
   const memoryDir = scaffoldMemoryVault(projectRoot);
   scaffoldCognitiveSkills(projectRoot);
   console.log(`🗄️ CoALA Zettelkasten vault initialized at: ${memoryDir}`);

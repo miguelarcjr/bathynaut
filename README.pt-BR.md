@@ -38,7 +38,7 @@ Agentes de codificação costumam enfrentar duas limitações estruturais em rep
 
 Ferramentas existentes normalmente resolvem apenas um lado desse problema — ou constroem um grafo AST de chamadas (muitas vezes exigindo ambientes Python ou expondo dezenas de tools MCP fragmentadas) ou gerenciam notas em Markdown sem integração com a AST do código.
 
-| Dimensão | Grafos Apenas de AST (`code-review-graph`, `graphify`) | Servidores de Notas Markdown | Bathynaut |
+| Dimensão | Grafos Apenas de AST | Servidores de Notas Markdown | Bathynaut |
 | :--- | :--- | :--- | :--- |
 | **Foco Principal** | Grafo de chamadas/imports, clusters, blast radius | ADRs, notas de sessão, wikilinks | Grafo AST unificado + memória estruturada ADR/Zettelkasten |
 | **Runtime** | Python (`uv`/`pipx`) ou binários nativos | Node.js ou Python | Node.js / TypeScript (`web-tree-sitter` WASM + SQLite) |

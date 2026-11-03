@@ -1,4 +1,4 @@
--- Bathynaut v0.2 SOTA Unified Relational Schema
+-- Bathynaut Unified Relational Schema
 
 CREATE TABLE IF NOT EXISTS file_state (
     file_path TEXT PRIMARY KEY,

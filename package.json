@@ -1,7 +1,7 @@
 {
   "name": "bathynaut",
   "version": "0.2.0",
-  "description": "The Unified Oceanic Cognitive Architecture & Memory Harness for AI Coding Agents (CoALA + AST + Zettelkasten + Hybrid RRF)",
+  "description": "Local AST code graph, topological analyzer, and ADR/Zettelkasten memory server (MCP) for AI coding agents",
   "type": "module",
   "bin": {
     "bathynaut": "./bin/bathynaut.js"
@@ -26,7 +26,7 @@
     "zettelkasten",
     "adr"
   ],
-  "author": "Miguel Arc & Antigravity",
+  "author": "Miguel Arc",
   "license": "MIT",
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.0.4",
@@ -47,5 +47,12 @@
     "@types/node": "^22.0.0",
     "typescript": "^5.6.0",
     "vitest": "^2.1.0"
-  }
+  },
+  "files": [
+    "dist",
+    "bin",
+    "README.md",
+    "README.pt-BR.md",
+    "LICENSE"
+  ]
 }

@@ -66,7 +66,7 @@ export interface SymbolRenamePreview {
 
 /**
  * Detects cross-community calls/imports that represent potential Architectural Drift
- * or high-betweenness bridges between distant subsystems (inspired by Graphify).
+ * or high-betweenness bridges between distant subsystems.
  */
 export function detectSurprisingConnections(db: Database, limit = 15): SurprisingConnection[] {
   const rows = db.prepare(`
@@ -147,7 +147,7 @@ export function detectKnowledgeGaps(db: Database): KnowledgeGap[] {
 }
 
 /**
- * Finds monolithic functions/classes exceeding `minLines` lines of code (inspired by Code-Review-Graph).
+ * Finds monolithic functions/classes exceeding `minLines` lines of code.
  */
 export function findLargeFunctions(db: Database, minLines = 50, limit = 20): LargeFunctionItem[] {
   const rows = db.prepare(`
@@ -178,7 +178,7 @@ export function findLargeFunctions(db: Database, minLines = 50, limit = 20): Lar
 }
 
 /**
- * Deterministic AST-backed symbol rename impact preview (inspired by Code-Review-Graph refactor_tool).
+ * Deterministic AST-backed symbol rename impact preview.
  */
 export function previewSymbolRename(
   db: Database,

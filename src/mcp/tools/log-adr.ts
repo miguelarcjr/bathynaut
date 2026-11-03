@@ -137,7 +137,7 @@ export function handleLogAdr(db: Database, memoryRoot: string, rawInput: z.input
   const parsedNote = parseZettelkastenNote(filePath, markdownContent);
   upsertNode(db, parsedNote.node);
 
-  // Physical file mutation + SQLite update for superseded notes (ZK-Wiki parity)
+  // Physical file mutation + SQLite update for superseded notes
   const supersededMarked: string[] = [];
   for (const edge of parsedNote.edges) {
     upsertEdge(db, edge);

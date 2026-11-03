@@ -72,7 +72,7 @@ export function handleLint(db: Database, memoryRoot?: string) {
     LIMIT 20
   `).all();
 
-  // 5. Uncompiled raw files (cross-checked against sources_json of compiled notes — ZK-Wiki parity)
+  // 5. Uncompiled raw files (cross-checked against sources_json of compiled notes)
   const compiledSources = new Set<string>();
   const sourceRows = db.prepare('SELECT sources_json FROM nodes WHERE sources_json IS NOT NULL').all() as Array<{ sources_json: string }>;
   for (const row of sourceRows) {

@@ -38,7 +38,7 @@ AI coding agents typically struggle with two structural limitations in medium-to
 
 Existing tools usually address only one side of this problem—either building an AST call graph (often requiring Python toolchains or exposing dozens of granular MCP tools) or managing a flat folder of Markdown notes without AST awareness.
 
-| Dimension | AST-Only Code Graphs (`code-review-graph`, `graphify`) | Markdown Memory Servers | Bathynaut |
+| Dimension | AST-Only Code Graphs | Markdown Memory Servers | Bathynaut |
 | :--- | :--- | :--- | :--- |
 | **Primary Focus** | Call/import graphs, clustering, blast radius | ADRs, session notes, wiki links | Unified AST graph + structured ADR/Zettelkasten memory |
 | **Runtime** | Python (`uv`/`pipx`) or native binaries | Node.js or Python | Node.js / TypeScript (`web-tree-sitter` WASM + SQLite) |

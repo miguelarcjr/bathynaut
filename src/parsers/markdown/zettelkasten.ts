@@ -58,7 +58,7 @@ function parseMatterSafe(fileContent: string): { data: Record<string, any>; cont
   try {
     return matter(fileContent);
   } catch {
-    // Auto-heal unquoted colons in YAML frontmatter (e.g., legacy zk-wiki notes with `summary: Foo: Bar`)
+    // Auto-heal unquoted colons in YAML frontmatter (e.g., markdown notes with `summary: Foo: Bar`)
     const healed = fileContent.replace(/^---\r?\n([\s\S]*?)\r?\n---/, (_, yamlBlock: string) => {
       const fixedLines = yamlBlock.split(/\r?\n/).map(line => {
         const match = line.match(/^(\s*(?:title|summary)\s*:\s*)(.+)$/);

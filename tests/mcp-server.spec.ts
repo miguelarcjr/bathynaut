@@ -12,7 +12,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
 
-describe('Bathynaut MCP Tools Suite v0.2 SOTA', () => {
+describe('Bathynaut MCP Tools Suite', () => {
   let tmpDir: string;
   let dbPath: string;
 
@@ -25,7 +25,7 @@ describe('Bathynaut MCP Tools Suite v0.2 SOTA', () => {
     fs.rmSync(tmpDir, { recursive: true, force: true });
   });
 
-  it('deve executar bathynaut_sonar retornando blast radius, blocking_invariants, risk_score, affected_flows e excerpts com token_budget', () => {
+  it('should execute bathynaut_sonar returning blast radius, blocking_invariants, risk_score, affected_flows, and token-budgeted excerpts', () => {
     const db = initDatabase(dbPath);
     upsertNode(db, { id: 'src/auth.ts#login', depth_zone: 'epipelagic', kind: 'function', name: 'login', file_path: 'src/auth.ts', line_start: 1, line_end: 10 });
     upsertNode(db, { id: 'tests/auth.spec.ts#testLogin', depth_zone: 'epipelagic', kind: 'test', name: 'testLogin', file_path: 'tests/auth.spec.ts', line_start: 1, line_end: 5 });
@@ -37,8 +37,8 @@ describe('Bathynaut MCP Tools Suite v0.2 SOTA', () => {
       file_path: '.bathynaut/memory/wiki/decisions/adr-001.md',
       applies_to_json: '["src/auth.ts"]',
       enforcement: 'blocking',
-      invariants_json: JSON.stringify(['Nunca usar pbkdf2Sync']),
-      body_markdown: 'Decisao critica sobre pbkdf2Sync no login'
+      invariants_json: JSON.stringify(['Never use synchronous pbkdf2Sync']),
+      body_markdown: 'Critical decision regarding pbkdf2Sync in login'
     });
 
     upsertEdge(db, { source_id: 'tests/auth.spec.ts#testLogin', target_id: 'src/auth.ts#login', relation: 'tested_by', confidence: 'EXTRACTED' });
@@ -50,16 +50,16 @@ describe('Bathynaut MCP Tools Suite v0.2 SOTA', () => {
     expect(parsed.target_files).toContain('src/auth.ts');
     expect(parsed.covering_tests.length).toBe(1);
     expect(parsed.governing_adrs.length).toBe(1);
-    expect(parsed.blocking_invariants).toContain('[adr-001] Nunca usar pbkdf2Sync');
+    expect(parsed.blocking_invariants).toContain('[adr-001] Never use synchronous pbkdf2Sync');
     expect(typeof parsed.risk_score).toBe('number');
     expect(Array.isArray(parsed.excerpts)).toBe(true);
     db.close();
   });
 
-  it('deve executar bathynaut_dive retornando communities, top_god_nodes, bridge_nodes e top_flows', () => {
+  it('should execute bathynaut_dive returning communities, top_god_nodes, bridge_nodes, and top_flows', () => {
     const db = initDatabase(dbPath);
     upsertNode(db, { id: 'fn:god', depth_zone: 'epipelagic', kind: 'function', name: 'godFn', file_path: 'src/god.ts', pagerank_score: 0.9, is_bridge: 1 });
-    db.prepare('INSERT INTO communities (id, name, cohesion, size, dominant_language, description) VALUES (0, ?, 0.85, 5, ?, ?)').run('Auth Core', 'typescript', 'Cluster central');
+    db.prepare('INSERT INTO communities (id, name, cohesion, size, dominant_language, description) VALUES (0, ?, 0.85, 5, ?, ?)').run('Auth Core', 'typescript', 'Core cluster');
     db.prepare('INSERT INTO flows (id, name, entrypoint_id, terminal_ids_json, node_path_json, depth, crosses_communities, criticality_score) VALUES (?, ?, ?, ?, ?, ?, ?, ?)').run(
       'flow:godFn',
       'godFn -> worker',
@@ -80,7 +80,7 @@ describe('Bathynaut MCP Tools Suite v0.2 SOTA', () => {
     db.close();
   });
 
-  it('deve executar bathynaut_path encontrando menor caminho com detalhes das arestas (relacao + confianca)', () => {
+  it('should execute bathynaut_path finding shortest path with edge relation and confidence details', () => {
     const db = initDatabase(dbPath);
     upsertNode(db, { id: 'nodeA', depth_zone: 'epipelagic', kind: 'function', name: 'funcA', file_path: 'a.ts' });
     upsertNode(db, { id: 'nodeB', depth_zone: 'epipelagic', kind: 'function', name: 'funcB', file_path: 'b.ts' });
@@ -98,11 +98,11 @@ describe('Bathynaut MCP Tools Suite v0.2 SOTA', () => {
     db.close();
   });
 
-  it('deve executar bathynaut_log_adr com auto-interlinking imediato, invariantes e bathynaut_recall RRF', () => {
+  it('should execute bathynaut_log_adr with immediate auto-interlinking, invariants, and bathynaut_recall RRF', () => {
     const db = initDatabase(dbPath);
     const memoryRoot = path.join(tmpDir, '.bathynaut', 'memory');
 
-    // Insere um no de codigo antes da ADR para testar o auto-interlink imediato
+    // Insert code node before ADR to verify immediate auto-interlinking
     upsertNode(db, {
       id: 'src/api/rate.ts#checkQuota',
       depth_zone: 'epipelagic',
@@ -114,11 +114,11 @@ describe('Bathynaut MCP Tools Suite v0.2 SOTA', () => {
     const logRes = handleLogAdr(db, memoryRoot, {
       title: 'Rate Limit Token Bucket',
       category: 'decisions',
-      context: 'Evitar sobrecarga na API publica',
-      decision: 'Usar algoritmo Token Bucket no Redis na funcao `checkQuota()`',
+      context: 'Prevent overload on public API',
+      decision: 'Use Redis Token Bucket algorithm in function `checkQuota()`',
       applies_to: ['src/api/*'],
       symbols: ['checkQuota'],
-      invariants: ['Toda rota publica deve chamar checkQuota'],
+      invariants: ['Every public route must call checkQuota'],
       enforcement: 'blocking'
     });
 
@@ -127,11 +127,11 @@ describe('Bathynaut MCP Tools Suite v0.2 SOTA', () => {
     expect(fs.existsSync(logged.file_path)).toBe(true);
     expect(logged.interlinked_edges).toBeGreaterThanOrEqual(1);
 
-    // Verifica se o sonar ja enxerga a nova ADR governando src/api/rate.ts sem precisar rodar map
+    // Verify sonar immediately sees the new ADR governing src/api/rate.ts
     const sonarRes = handleSonar(db, { files: ['src/api/rate.ts'], token_budget: 2000 });
     const sonarData = JSON.parse(sonarRes.content[0].text);
     expect(sonarData.governing_adrs.some((a: any) => a.id === logged.adr_id)).toBe(true);
-    expect(sonarData.blocking_invariants).toContain(`[${logged.adr_id}] Toda rota publica deve chamar checkQuota`);
+    expect(sonarData.blocking_invariants).toContain(`[${logged.adr_id}] Every public route must call checkQuota`);
 
     const recallRes = handleRecall(db, { query: 'Token Bucket', limit: 5, token_budget: 1500 });
     const recalled = JSON.parse(recallRes.content[0].text);
@@ -141,17 +141,17 @@ describe('Bathynaut MCP Tools Suite v0.2 SOTA', () => {
     db.close();
   });
 
-  it('deve executar bathynaut_checkpoint e bathynaut_lint 5D (stale_adrs, untested_god_nodes, pending_raw_files)', () => {
+  it('should execute bathynaut_checkpoint and bathynaut_lint (stale_adrs, untested_god_nodes, pending_raw_files)', () => {
     const db = initDatabase(dbPath);
     const memoryRoot = path.join(tmpDir, '.bathynaut', 'memory');
     const rawDir = path.join(memoryRoot, 'raw');
     fs.mkdirSync(rawDir, { recursive: true });
-    fs.writeFileSync(path.join(rawDir, 'postmortem-draft.md'), '# Rascunho bruto', 'utf-8');
+    fs.writeFileSync(path.join(rawDir, 'postmortem-draft.md'), '# Raw draft', 'utf-8');
 
     const cpRes = handleCheckpoint(memoryRoot, {
-      summary: 'Finalizada camada MCP',
-      active_tasks: ['Rodar testes E2E'],
-      decisions: ['Usar stdio transport']
+      summary: 'Completed MCP layer',
+      active_tasks: ['Run E2E tests'],
+      decisions: ['Use stdio transport']
     });
     const cp = JSON.parse(cpRes.content[0].text);
     expect(cp.success).toBe(true);
@@ -160,7 +160,7 @@ describe('Bathynaut MCP Tools Suite v0.2 SOTA', () => {
       id: 'adr-stale',
       depth_zone: 'abyssal',
       kind: 'adr',
-      name: 'ADR Desatualizada',
+      name: 'Stale ADR',
       file_path: 'adr-stale.md',
       status: 'stale'
     });

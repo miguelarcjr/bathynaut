@@ -9,7 +9,7 @@ import { handleSonar } from '../src/mcp/tools/sonar.js';
 import { handleDive } from '../src/mcp/tools/dive.js';
 import { handleRecall } from '../src/mcp/tools/recall.js';
 
-describe('Bathynaut End-to-End Lifecycle v0.2 SOTA', () => {
+describe('Bathynaut End-to-End Lifecycle v0.2', () => {
   const e2eRoot = path.resolve('tests/temp-e2e-repo');
 
   beforeEach(() => {
