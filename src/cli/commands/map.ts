@@ -13,7 +13,7 @@ export async function runMapCommand(projectRoot: string, options: { force?: bool
   console.log(`🌊 [Bathynaut v0.2.0] Indexing repository: ${projectRoot} (Vault: ${vaultKind})`);
 
   try {
-    const syncStats = await ensureFreshGraph(projectRoot, db, memoryRoot, { force: options.force ?? true });
+    const syncStats = await ensureFreshGraph(projectRoot, db, memoryRoot, { force: Boolean(options.force) });
     const autoArchCount = generateCommunityArchitectureNotes(memoryRoot, db);
     if (autoArchCount > 0) {
       generateMOCIndex(memoryRoot, db);

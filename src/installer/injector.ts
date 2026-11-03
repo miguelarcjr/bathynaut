@@ -31,7 +31,9 @@ function buildRulesBlock(filePath: string, projectRoot?: string): string {
   const normalized = filePath.replace(/\\/g, '/');
   const memPrefix = resolveRelativeMemoryPrefix(projectRoot);
   const normRoot = projectRoot ? projectRoot.replace(/\\/g, '/') : undefined;
-  const rootHintLine = normRoot ? [`- Workspace Root (\`project_path\`): \`${normRoot}\` (always pass \`project_path: "${normRoot}"\` in Bathynaut MCP calls)`] : [];
+  const rootHintLine = normRoot
+    ? [`- Workspace Root (\`project_path\`): \`${normRoot}\` (always pass \`project_path: "${normRoot}"\` in Bathynaut MCP calls)`]
+    : [];
 
   // 1. Cursor Modern Rule (.cursor/rules/bathynaut.mdc)
   if (baseName.endsWith('.mdc')) {
@@ -49,27 +51,27 @@ function buildRulesBlock(filePath: string, projectRoot?: string): string {
     ].join('\n');
   }
 
-  // 2. Antigravity Modular Rule (.agents/rules/bathynaut.md)
+  // 2. Antigravity Modular Rule (.agents/rules/bathynaut.md) — lightweight pointer (avoids duplicating @[...] expansion from AGENTS.md)
   if (normalized.endsWith('.agents/rules/bathynaut.md')) {
     return [
       '---',
-      'trigger: always_on',
-      'description: Bathynaut Cognitive Architecture & Pre-Edit Sonar Protocol',
+      'trigger: model_decision',
+      'description: Bathynaut AST Sonar, Macro Topology & ADR Memory Protocol',
       '---',
       '',
       '<!-- BATHYNAUT:START -->',
       ...CORE_PROTOCOL_LINES,
       '',
-      '### Immediate Session Context (Progressive Disclosure):',
+      '### Immediate Session Context:',
       ...rootHintLine,
-      `- Active Session State: @[Active Session Context](${memPrefix}/activeContext.md)`,
-      `- Map of Content (MOC): @[Wiki Index](${memPrefix}/index.md)`,
+      `- Active Session State: \`${memPrefix}/activeContext.md\``,
+      `- Map of Content (MOC): \`${memPrefix}/index.md\``,
       '<!-- BATHYNAUT:END -->'
     ].join('\n');
   }
 
-  // 3. Antigravity / Gemini Root Files (GEMINI.md, AGENTS.md, .agents/GEMINI.md)
-  if (baseName === 'GEMINI.md' || baseName === 'AGENTS.md') {
+  // 3. Root AGENTS.md (Primary rule with @[...] Progressive Disclosure inline expansion)
+  if (baseName === 'AGENTS.md') {
     return [
       '<!-- BATHYNAUT:START -->',
       ...CORE_PROTOCOL_LINES,
@@ -82,7 +84,21 @@ function buildRulesBlock(filePath: string, projectRoot?: string): string {
     ].join('\n');
   }
 
-  // 4. Claude Code (CLAUDE.md supports @path native includes)
+  // 4. GEMINI.md (For Gemini CLI; uses path pointers so Antigravity does not inline activeContext.md twice alongside AGENTS.md)
+  if (baseName === 'GEMINI.md') {
+    return [
+      '<!-- BATHYNAUT:START -->',
+      ...CORE_PROTOCOL_LINES,
+      '',
+      '### Immediate Session Context:',
+      ...rootHintLine,
+      `- Active Session State: \`${memPrefix}/activeContext.md\``,
+      `- Map of Content (MOC): \`${memPrefix}/index.md\``,
+      '<!-- BATHYNAUT:END -->'
+    ].join('\n');
+  }
+
+  // 5. Claude Code (CLAUDE.md supports @path native includes)
   if (baseName === 'CLAUDE.md') {
     return [
       '<!-- BATHYNAUT:START -->',
@@ -96,7 +112,7 @@ function buildRulesBlock(filePath: string, projectRoot?: string): string {
     ].join('\n');
   }
 
-  // 5. Generic Markdown Rules (.cursorrules, .windsurfrules, copilot-instructions.md)
+  // 6. Generic Markdown Rules (.cursorrules, .windsurfrules, copilot-instructions.md)
   return [
     '<!-- BATHYNAUT:START -->',
     ...CORE_PROTOCOL_LINES,
@@ -278,9 +294,12 @@ export function removeMCPConfig(configPath: string): boolean {
 }
 
 /**
- * Injects non-blocking Agent Lifecycle Hooks (SessionStart & PreToolUse) into
- * Antigravity (.agents/hooks.json), Claude Code (.claude/settings.json),
- * Cursor (.cursor/hooks.json), and Gemini CLI (.gemini/settings.json).
+ * Injects non-blocking Agent Lifecycle Hooks (SessionStart, PreInvocation/UserPromptSubmit, PreToolUse, PostToolUse)
+ * using the native schema of each platform:
+ * - Antigravity (.agents/hooks.json): top-level named hook "bathynaut-guard" with SessionStart, PreInvocation, PreToolUse, PostToolUse
+ * - Claude Code (.claude/settings.json): top-level "hooks" with SessionStart, UserPromptSubmit, PreToolUse, PostToolUse
+ * - Gemini CLI (.gemini/settings.json): top-level "hooks" with SessionStart, BeforeAgent, PreToolUse, PostToolUse
+ * - Cursor (.cursor/hooks.json): version 1 "hooks" with beforeSubmitPrompt, beforeShellExecution, afterFileEdit
  */
 export function injectAgentHooks(
   hooksConfigPath: string,
@@ -307,51 +326,83 @@ export function injectAgentHooks(
       ? `node "${serverBinPath.replace(/\\/g, '/')}"`
       : 'npx --no-install bathynaut';
 
-    const sessionStartCmd = `${runner} hook-guard --event SessionStart -d "${normalizedRoot}"`;
-    const preToolCmd = `${runner} hook-guard --event PreToolUse -d "${normalizedRoot}"`;
+    const sessionStartCmd = `${runner} hook-guard --agent ${agentName} --event SessionStart -d "${normalizedRoot}"`;
+    const preInvokeCmd = `${runner} hook-guard --agent ${agentName} --event PreInvocation -d "${normalizedRoot}"`;
+    const preToolCmd = `${runner} hook-guard --agent ${agentName} --event PreToolUse -d "${normalizedRoot}"`;
+    const postToolCmd = `${runner} hook-guard --agent ${agentName} --event PostToolUse -d "${normalizedRoot}"`;
 
-    if (agentName === 'cursor') {
+    if (agentName === 'antigravity') {
+      if (config.hooks && !config['bathynaut-guard']) {
+        delete config.hooks;
+      }
+      config['bathynaut-guard'] = {
+        enabled: true,
+        SessionStart: [
+          { type: 'command', command: sessionStartCmd, timeout: 5 }
+        ],
+        PreInvocation: [
+          { type: 'command', command: preInvokeCmd, timeout: 5 }
+        ],
+        PreToolUse: [
+          {
+            matcher: 'edit_file|write_file',
+            hooks: [{ type: 'command', command: preToolCmd, timeout: 5 }]
+          }
+        ],
+        PostToolUse: [
+          {
+            matcher: 'edit_file|write_file',
+            hooks: [{ type: 'command', command: postToolCmd, timeout: 10 }]
+          }
+        ]
+      };
+    } else if (agentName === 'cursor') {
       if (!config.version) config.version = 1;
       if (!config.hooks) config.hooks = {};
-      const existingList: any[] = Array.isArray(config.hooks.beforeShellExecution)
-        ? config.hooks.beforeShellExecution.filter((h: any) => !String(h?.command || '').includes('hook-guard'))
-        : [];
-      existingList.push({
-        command: preToolCmd,
-        timeout: 5
-      });
-      config.hooks.beforeShellExecution = existingList;
+
+      const filterNonBathynaut = (arr: any[]) =>
+        Array.isArray(arr) ? arr.filter((h: any) => !String(h?.command || '').includes('hook-guard')) : [];
+
+      config.hooks.beforeSubmitPrompt = [
+        ...filterNonBathynaut(config.hooks.beforeSubmitPrompt),
+        { command: preInvokeCmd, timeout: 5 }
+      ];
+      config.hooks.beforeShellExecution = [
+        ...filterNonBathynaut(config.hooks.beforeShellExecution),
+        { command: preToolCmd, timeout: 5 }
+      ];
+      config.hooks.afterFileEdit = [
+        ...filterNonBathynaut(config.hooks.afterFileEdit),
+        { command: postToolCmd, timeout: 10 }
+      ];
     } else {
+      // Claude Code (.claude/settings.json) & Gemini CLI (.gemini/settings.json)
       if (!config.hooks) config.hooks = {};
 
-      const matcher =
-        agentName === 'antigravity'
-          ? 'edit_file|write_file'
-          : agentName === 'gemini-cli'
-            ? 'write_file|replace'
-            : 'Edit|Write|MultiEdit';
+      const matcher = agentName === 'gemini-cli' ? 'write_file|replace' : 'Edit|Write|MultiEdit';
+      const promptEventKey = agentName === 'gemini-cli' ? 'BeforeAgent' : 'UserPromptSubmit';
 
-      const existingSession: any[] = Array.isArray(config.hooks.SessionStart)
-        ? config.hooks.SessionStart.filter(
-            (entry: any) => !entry?.hooks?.some((h: any) => String(h?.command || '').includes('hook-guard'))
-          )
-        : [];
-      existingSession.push({
-        matcher: '',
-        hooks: [{ type: 'command', command: sessionStartCmd, timeout: 5 }]
-      });
-      config.hooks.SessionStart = existingSession;
+      const filterNonBathynautGroup = (arr: any[]) =>
+        Array.isArray(arr)
+          ? arr.filter((entry: any) => !entry?.hooks?.some((h: any) => String(h?.command || '').includes('hook-guard')))
+          : [];
 
-      const existingPreTool: any[] = Array.isArray(config.hooks.PreToolUse)
-        ? config.hooks.PreToolUse.filter(
-            (entry: any) => !entry?.hooks?.some((h: any) => String(h?.command || '').includes('hook-guard'))
-          )
-        : [];
-      existingPreTool.push({
-        matcher,
-        hooks: [{ type: 'command', command: preToolCmd, timeout: 5 }]
-      });
-      config.hooks.PreToolUse = existingPreTool;
+      config.hooks.SessionStart = [
+        ...filterNonBathynautGroup(config.hooks.SessionStart),
+        { matcher: '', hooks: [{ type: 'command', command: sessionStartCmd, timeout: 5 }] }
+      ];
+      config.hooks[promptEventKey] = [
+        ...filterNonBathynautGroup(config.hooks[promptEventKey]),
+        { matcher: '', hooks: [{ type: 'command', command: preInvokeCmd, timeout: 5 }] }
+      ];
+      config.hooks.PreToolUse = [
+        ...filterNonBathynautGroup(config.hooks.PreToolUse),
+        { matcher, hooks: [{ type: 'command', command: preToolCmd, timeout: 5 }] }
+      ];
+      config.hooks.PostToolUse = [
+        ...filterNonBathynautGroup(config.hooks.PostToolUse),
+        { matcher, hooks: [{ type: 'command', command: postToolCmd, timeout: 10 }] }
+      ];
     }
 
     fs.writeFileSync(hooksConfigPath, JSON.stringify(config, null, 2), 'utf-8');
@@ -365,25 +416,44 @@ export function removeAgentHooks(hooksConfigPath: string): boolean {
   try {
     if (!fs.existsSync(hooksConfigPath)) return false;
     const config = JSON.parse(fs.readFileSync(hooksConfigPath, 'utf-8'));
-    if (!config?.hooks) return false;
-
     let modified = false;
-    for (const eventKey of ['SessionStart', 'PreToolUse', 'PostToolUse', 'beforeShellExecution']) {
-      if (Array.isArray(config.hooks[eventKey])) {
-        const beforeLen = config.hooks[eventKey].length;
-        config.hooks[eventKey] = config.hooks[eventKey].filter((entry: any) => {
-          if (typeof entry?.command === 'string' && entry.command.includes('hook-guard')) return false;
-          if (Array.isArray(entry?.hooks) && entry.hooks.some((h: any) => String(h?.command || '').includes('hook-guard'))) {
-            return false;
+
+    if (config['bathynaut-guard']) {
+      delete config['bathynaut-guard'];
+      modified = true;
+    }
+
+    if (config?.hooks) {
+      for (const eventKey of [
+        'SessionStart',
+        'PreInvocation',
+        'UserPromptSubmit',
+        'BeforeAgent',
+        'PreToolUse',
+        'PostToolUse',
+        'beforeSubmitPrompt',
+        'beforeShellExecution',
+        'afterFileEdit'
+      ]) {
+        if (Array.isArray(config.hooks[eventKey])) {
+          const beforeLen = config.hooks[eventKey].length;
+          config.hooks[eventKey] = config.hooks[eventKey].filter((entry: any) => {
+            if (typeof entry?.command === 'string' && entry.command.includes('hook-guard')) return false;
+            if (Array.isArray(entry?.hooks) && entry.hooks.some((h: any) => String(h?.command || '').includes('hook-guard'))) {
+              return false;
+            }
+            return true;
+          });
+          if (config.hooks[eventKey].length !== beforeLen) {
+            modified = true;
           }
-          return true;
-        });
-        if (config.hooks[eventKey].length !== beforeLen) {
-          modified = true;
+          if (config.hooks[eventKey].length === 0) {
+            delete config.hooks[eventKey];
+          }
         }
-        if (config.hooks[eventKey].length === 0) {
-          delete config.hooks[eventKey];
-        }
+      }
+      if (Object.keys(config.hooks).length === 0) {
+        delete config.hooks;
       }
     }
 
@@ -395,4 +465,47 @@ export function removeAgentHooks(hooksConfigPath: string): boolean {
   } catch {
     return false;
   }
+}
+
+const LEGACY_TRIAD_SKILLS = [
+  'build-graph',
+  'explore-codebase',
+  'debug-issue',
+  'refactor-safely',
+  'review-changes',
+  'review-delta',
+  'review-pr',
+  'wiki-compile',
+  'wiki-lint',
+  'session-checkpoint',
+  'map-project',
+  'graphify'
+];
+
+/**
+ * Cleans up leftover rules and skills from legacy Triad setups (graphify, code-review-graph, zk-wiki)
+ * so the agent is never given conflicting instructions to call disabled MCP servers.
+ */
+export function cleanupLegacyTriadArtifacts(projectRoot: string): void {
+  try {
+    const legacyRulePaths = [
+      path.join(projectRoot, '.agents', 'rules', 'graphify.md'),
+      path.join(projectRoot, '.agents', 'rules', 'code-review-graph.md'),
+      path.join(projectRoot, '.agents', 'rules', 'zk-wiki.md'),
+      path.join(projectRoot, '.agents', 'GEMINI.md')
+    ];
+    for (const p of legacyRulePaths) {
+      if (fs.existsSync(p)) {
+        backupFileIfExists(p, projectRoot);
+        fs.unlinkSync(p);
+      }
+    }
+
+    for (const skillName of LEGACY_TRIAD_SKILLS) {
+      const skillDir = path.join(projectRoot, '.agents', 'skills', skillName);
+      if (fs.existsSync(skillDir)) {
+        fs.rmSync(skillDir, { recursive: true, force: true });
+      }
+    }
+  } catch {}
 }

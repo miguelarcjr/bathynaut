@@ -33,10 +33,6 @@ export function detectInstalledAgents(projectRoot: string): DetectedAgent[] {
     path.join(projectRoot, 'GEMINI.md'),
     path.join(projectRoot, '.agents', 'rules', 'bathynaut.md')
   ];
-  const dotAgentsGemini = path.join(projectRoot, '.agents', 'GEMINI.md');
-  if (fs.existsSync(dotAgentsGemini)) {
-    agyExtraRules.push(dotAgentsGemini);
-  }
 
   agents.push({
     name: 'antigravity',

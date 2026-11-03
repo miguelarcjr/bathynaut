@@ -5,7 +5,7 @@ import { runInitCommand } from './commands/init.js';
 import { runMapCommand } from './commands/map.js';
 import { runReviewCommand } from './commands/review.js';
 import { runDisconnectCommand } from './commands/disconnect.js';
-import { runHooksCommand, evaluateHookGuard } from './commands/hooks.js';
+import { runHooksCommand, evaluateHookGuard, evaluatePostToolSync, HookEventName, HookAgentKind } from './commands/hooks.js';
 import { initDatabase, getDatabasePath } from '../storage/db.js';
 import { resolveMemoryVault } from '../storage/pool.js';
 import { runServerStdio } from '../mcp/server.js';
@@ -118,12 +118,17 @@ program
 
 program
   .command('hook-guard')
-  .description('Fast (<15ms) Agent Lifecycle Hook evaluator (SessionStart | PreToolUse) for Antigravity, Claude Code, Cursor, and Gemini CLI')
+  .description('Multi-Agent Lifecycle Hook evaluator (SessionStart | PreInvocation | PreToolUse | PostToolUse)')
   .option('-d, --dir <path>', 'Project root directory', process.cwd())
-  .option('-e, --event <event>', 'Hook event name (SessionStart | PreToolUse)', 'SessionStart')
+  .option('-e, --event <event>', 'Hook event name (SessionStart | PreInvocation | PreToolUse | PostToolUse)', 'SessionStart')
+  .option('-a, --agent <agent>', 'Target agent contract (antigravity | claude-code | cursor | gemini-cli)', 'antigravity')
   .action(async (opts) => {
     const projectRoot = path.resolve(opts.dir);
-    const event = opts.event === 'PreToolUse' ? 'PreToolUse' : 'SessionStart';
+    const validEvents: HookEventName[] = ['SessionStart', 'PreInvocation', 'PreToolUse', 'PostToolUse'];
+    const event: HookEventName = validEvents.includes(opts.event) ? opts.event : 'SessionStart';
+    const agent: HookAgentKind = ['antigravity', 'claude-code', 'cursor', 'gemini-cli'].includes(opts.agent)
+      ? opts.agent
+      : 'antigravity';
 
     let rawStdin = '';
     if (!process.stdin.isTTY) {
@@ -149,8 +154,26 @@ program
       } catch {}
     }
 
-    const out = evaluateHookGuard(projectRoot, event, payload);
-    if (out.hookSpecificOutput) {
+    if (event === 'PostToolUse') {
+      const out = await evaluatePostToolSync(projectRoot);
+      process.stdout.write(JSON.stringify(out) + '\n');
+      return;
+    }
+
+    const out = evaluateHookGuard(projectRoot, event, payload, agent);
+    if (agent === 'antigravity') {
+      const { hookSpecificOutput: _, ...agyPure } = out;
+      if (Object.keys(agyPure).length > 0) {
+        process.stdout.write(JSON.stringify(agyPure) + '\n');
+      } else if (event === 'PreToolUse') {
+        process.stdout.write(JSON.stringify({ decision: 'allow' }) + '\n');
+      } else {
+        process.stdout.write('{}\n');
+      }
+      return;
+    }
+
+    if (Object.keys(out).length > 0) {
       process.stdout.write(JSON.stringify(out) + '\n');
     }
   });
