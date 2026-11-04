@@ -1,6 +1,6 @@
 {
   "name": "bathynaut",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Local AST code graph, topological analyzer, and ADR/Zettelkasten memory server (MCP) for AI coding agents",
   "type": "module",
   "bin": {
@@ -31,7 +31,6 @@
   "license": "MIT",
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.0.4",
-    "better-sqlite3": "^11.5.0",
     "commander": "^12.1.0",
     "graphology": "^0.25.4",
     "graphology-communities-louvain": "^2.0.0",
@@ -42,6 +41,9 @@
     "tree-sitter-wasms": "^0.1.13",
     "web-tree-sitter": "^0.22.6",
     "zod": "^3.23.8"
+  },
+  "optionalDependencies": {
+    "better-sqlite3": "^11.5.0"
   },
   "devDependencies": {
     "@types/better-sqlite3": "^7.6.11",
