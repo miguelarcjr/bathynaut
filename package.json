@@ -13,7 +13,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "start": "node dist/cli/main.js",
-    "postbuild": "node scripts/copy-assets.mjs"
+    "postbuild": "node scripts/copy-assets.mjs",
+    "prepack": "npm run build"
   },
   "keywords": [
     "ai",
@@ -63,5 +64,8 @@
   "homepage": "https://github.com/miguelarcjr/bathynaut#readme",
   "bugs": {
     "url": "https://github.com/miguelarcjr/bathynaut/issues"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }
