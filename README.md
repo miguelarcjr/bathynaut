@@ -4,7 +4,7 @@
 
 [English](README.md) | [Português (Brasil)](README.pt-BR.md)
 
-[![Version 0.2.0](https://img.shields.io/badge/version-0.2.0-0284c7?style=flat-square)](https://github.com/miguelarc/bathynaut)
+[![Version 0.2.0](https://img.shields.io/badge/version-0.2.0-0284c7?style=flat-square)](https://github.com/miguelarcjr/bathynaut)
 [![License: MIT](https://img.shields.io/badge/license-MIT-64748b?style=flat-square)](LICENSE)
 [![Node.js >= 18](https://img.shields.io/badge/node-%3E%3D18%20(22%2B%20native%20sqlite)-16a34a?style=flat-square)](https://nodejs.org)
 [![TypeScript 5.6](https://img.shields.io/badge/TypeScript-5.6-2563eb?style=flat-square)](https://www.typescriptlang.org)

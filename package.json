@@ -54,5 +54,13 @@
     "README.md",
     "README.pt-BR.md",
     "LICENSE"
-  ]
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/miguelarcjr/bathynaut.git"
+  },
+  "homepage": "https://github.com/miguelarcjr/bathynaut#readme",
+  "bugs": {
+    "url": "https://github.com/miguelarcjr/bathynaut/issues"
+  }
 }
