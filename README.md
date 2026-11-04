@@ -262,6 +262,10 @@ When `PreToolUse` hooks are active, editing a file governed by an ADR injects a 
 
 ## Visual Graph Explorer (`bathynaut.html`)
 
+<p align="center">
+  <img src="assets/dashboard-preview.png" alt="Bathynaut Ocean Canvas Graph Explorer" width="100%" />
+</p>
+
 Run `npx bathynaut explore` to generate and open `.bathynaut/bathynaut.html` in your browser. It is a standalone HTML file with an embedded JSON snapshot and D3.js force layout:
 
 - **Left Sidebar**:
