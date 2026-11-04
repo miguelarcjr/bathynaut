@@ -323,4 +323,4 @@ Yes. If `.agents/memory/wiki` already exists in the project, Bathynaut uses it i
 
 ## License
 
-MIT © Miguel Arc
+MIT © Miguel Junior

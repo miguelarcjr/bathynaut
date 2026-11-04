@@ -248,4 +248,4 @@ Sim. O servidor MCP mantém um pool LRU (`ProjectContextPool`) e resolve o repos
 
 ## Licença
 
-MIT © Miguel Arc
+MIT © Miguel Junior
