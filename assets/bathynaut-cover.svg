@@ -1,0 +1,137 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 860 360" width="100%" height="100%">
+  <defs>
+    <linearGradient id="oceanBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#040d1a" />
+      <stop offset="50%" stop-color="#07192f" />
+      <stop offset="100%" stop-color="#020813" />
+    </linearGradient>
+
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="4" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+
+    <style>
+      .title { font: 700 22px 'Segoe UI', Ubuntu, sans-serif; fill: #e2f1ff; letter-spacing: 2px; }
+      .subtitle { font: 400 12px 'Segoe UI', Ubuntu, monospace; fill: #64ffda; letter-spacing: 1px; }
+      .node-title { font: 700 13px 'Segoe UI', Ubuntu, sans-serif; fill: #ffffff; }
+      .node-desc { font: 400 11px 'Segoe UI', Ubuntu, monospace; fill: #8892b0; }
+      .badge { font: 700 11px 'Segoe UI', Ubuntu, monospace; fill: #040d1a; }
+
+      .flow-line {
+        fill: none;
+        stroke-width: 2;
+        stroke-dasharray: 8 6;
+        animation: dashFlow 1.8s linear infinite;
+      }
+
+      .sonar-ring {
+        fill: none;
+        stroke: #64ffda;
+        stroke-width: 1.2;
+        transform-origin: 430px 195px;
+        animation: sonarPulse 4s ease-out infinite;
+      }
+      .sonar-ring-2 {
+        animation-delay: 2s;
+      }
+
+      .card {
+        fill: #0a192f;
+        stroke-width: 1.5;
+        rx: 10;
+      }
+
+      .pulse-dot {
+        animation: glowPulse 2s ease-in-out infinite alternate;
+      }
+
+      @keyframes dashFlow {
+        to { stroke-dashoffset: -28; }
+      }
+
+      @keyframes sonarPulse {
+        0% { transform: scale(0.3); opacity: 0.7; }
+        100% { transform: scale(2.4); opacity: 0; }
+      }
+
+      @keyframes glowPulse {
+        0% { opacity: 0.4; }
+        100% { opacity: 1; }
+      }
+    </style>
+  </defs>
+
+  <!-- Background -->
+  <rect width="860" height="360" rx="16" fill="url(#oceanBg)" stroke="#112240" stroke-width="2" />
+
+  <!-- Subtle Grid -->
+  <g stroke="#112240" stroke-width="0.7" opacity="0.5">
+    <line x1="0" y1="90" x2="860" y2="90" />
+    <line x1="0" y1="180" x2="860" y2="180" />
+    <line x1="0" y1="270" x2="860" y2="270" />
+    <line x1="215" y1="0" x2="215" y2="360" />
+    <line x1="430" y1="0" x2="430" y2="360" />
+    <line x1="645" y1="0" x2="645" y2="360" />
+  </g>
+
+  <!-- Header -->
+  <text x="430" y="38" text-anchor="middle" class="title">BATHYNAUT</text>
+  <text x="430" y="58" text-anchor="middle" class="subtitle">DEEP-SEA CODE GRAPH, TOPOLOGY &amp; ZETTELKASTEN MCP SERVER</text>
+
+  <!-- Sonar Waves from MCP Core -->
+  <circle cx="430" cy="195" r="55" class="sonar-ring" />
+  <circle cx="430" cy="195" r="55" class="sonar-ring sonar-ring-2" />
+
+  <!-- Animated Data Flow Lines -->
+  <path d="M 250 130 C 310 130, 320 175, 360 185" class="flow-line" stroke="#00b4d8" />
+  <path d="M 250 265 C 310 265, 320 215, 360 205" class="flow-line" stroke="#f77f00" />
+  <path d="M 500 185 C 540 175, 550 130, 610 130" class="flow-line" stroke="#a855f7" />
+  <path d="M 500 205 C 540 215, 550 265, 610 265" class="flow-line" stroke="#64ffda" />
+
+  <!-- Node 1: Local AST Code Graph -->
+  <g transform="translate(40, 85)">
+    <rect width="210" height="85" class="card" stroke="#00b4d8" />
+    <circle cx="24" cy="26" r="6" fill="#00b4d8" class="pulse-dot" filter="url(#glow)" />
+    <text x="40" y="30" class="node-title">Local AST Code Graph</text>
+    <text x="20" y="52" class="node-desc">&#8226; Symbols, calls &amp; types</text>
+    <text x="20" y="69" class="node-desc">&#8226; Exact 100% offline graph</text>
+  </g>
+
+  <!-- Node 2: Topological Analyzer -->
+  <g transform="translate(40, 220)">
+    <rect width="210" height="85" class="card" stroke="#f77f00" />
+    <circle cx="24" cy="26" r="6" fill="#f77f00" class="pulse-dot" filter="url(#glow)" />
+    <text x="40" y="30" class="node-title">Topological Analyzer</text>
+    <text x="20" y="52" class="node-desc">&#8226; Blast radius &amp; coupling</text>
+    <text x="20" y="69" class="node-desc">&#8226; Cycles &amp; module clusters</text>
+  </g>
+
+  <!-- Center Core: Bathynaut MCP Server -->
+  <g transform="translate(355, 140)">
+    <rect width="150" height="110" rx="16" fill="#0d2547" stroke="#64ffda" stroke-width="2.5" filter="url(#glow)" />
+    <rect x="35" y="14" width="80" height="20" rx="10" fill="#64ffda" />
+    <text x="75" y="28" text-anchor="middle" class="badge">MCP CORE</text>
+    <text x="75" y="58" text-anchor="middle" class="node-title">Bathynaut Engine</text>
+    <text x="75" y="78" text-anchor="middle" class="node-desc">Tools &#8226; Resources</text>
+    <text x="75" y="94" text-anchor="middle" class="node-desc">Deep Context Sync</text>
+  </g>
+
+  <!-- Node 3: ADR & Zettelkasten Memory -->
+  <g transform="translate(610, 85)">
+    <rect width="210" height="85" class="card" stroke="#a855f7" />
+    <circle cx="24" cy="26" r="6" fill="#a855f7" class="pulse-dot" filter="url(#glow)" />
+    <text x="40" y="30" class="node-title">ADR / Zettelkasten</text>
+    <text x="20" y="52" class="node-desc">&#8226; Living architectural decisions</text>
+    <text x="20" y="69" class="node-desc">&#8226; Grounded in AST code nodes</text>
+  </g>
+
+  <!-- Node 4: AI Coding Agents -->
+  <g transform="translate(610, 220)">
+    <rect width="210" height="85" class="card" stroke="#64ffda" />
+    <circle cx="24" cy="26" r="6" fill="#64ffda" class="pulse-dot" filter="url(#glow)" />
+    <text x="40" y="30" class="node-title">AI Coding Agents</text>
+    <text x="20" y="52" class="node-desc">&#8226; Zero structural blindness</text>
+    <text x="20" y="69" class="node-desc">&#8226; Persistent causal memory</text>
+  </g>
+</svg>

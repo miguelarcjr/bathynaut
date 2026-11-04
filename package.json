@@ -51,6 +51,7 @@
   "files": [
     "dist",
     "bin",
+    "assets",
     "README.md",
     "README.pt-BR.md",
     "LICENSE"

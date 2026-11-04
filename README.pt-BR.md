@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="assets/bathynaut-cover-pt.svg" alt="Bathynaut Capa Animada" width="100%" />
+</p>
+
 # Bathynaut
 
 **Grafo AST de código, analisador topológico e servidor de memória ADR/Zettelkasten local (MCP) para agentes de IA.**

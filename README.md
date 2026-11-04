@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="assets/bathynaut-cover.svg" alt="Bathynaut Cover" width="100%" />
+</p>
+
 # Bathynaut
 
 **Local AST code graph, topological analyzer, and ADR/Zettelkasten memory server (MCP) for AI coding agents.**
