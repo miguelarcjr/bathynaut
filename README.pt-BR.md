@@ -4,6 +4,8 @@
 
 # Bathynaut
 
+> **Impeça que agentes de IA quebrem sua arquitetura ou esqueçam decisões técnicas passadas.**
+
 **Grafo AST de código, analisador topológico e servidor de memória ADR/Zettelkasten local (MCP) para agentes de IA.**
 
 [English](README.md) | [Português (Brasil)](README.pt-BR.md)
@@ -13,8 +15,6 @@
 [![Node.js >= 18](https://img.shields.io/badge/node-%3E%3D18%20(22%2B%20native%20sqlite)-16a34a?style=flat-square)](https://nodejs.org)
 [![TypeScript 5.6](https://img.shields.io/badge/TypeScript-5.6-2563eb?style=flat-square)](https://www.typescriptlang.org)
 [![MCP Stdio](https://img.shields.io/badge/MCP-stdio-7c3aed?style=flat-square)](https://modelcontextprotocol.io)
-
-O Bathynaut indexa a árvore sintática abstrata do repositório (via `web-tree-sitter` WASM), calcula a topologia de módulos (clusterização Louvain e centralidade PageRank) e conecta símbolos de código-fonte diretamente a registros de decisão arquitetural (ADRs), incidentes e padrões armazenados em Markdown puro. Tudo reside em um único banco SQLite local (`.bathynaut/ocean.db`) exposto via Model Context Protocol (MCP), sem chamadas a APIs externas.
 
 ---
 
@@ -36,11 +36,28 @@ O Bathynaut indexa a árvore sintática abstrata do repositório (via `web-tree-
 
 ## Visão Geral e Objetivos de Projeto
 
-Agentes de codificação costumam enfrentar duas limitações estruturais em repositórios médios e grandes:
-1. **Falta de visibilidade estrutural**: Buscas textuais (`grep`) ou leitura de trechos isolados não revelam chamadores transitivos, fluxos de execução ou cobertura de testes antes de uma edição.
-2. **Sessões sem memória causal**: Decisões arquiteturais, regressões passadas e invariantes de domínio documentados em Markdown raramente ficam conectados às funções e arquivos específicos que governam.
+### O Problema que o Bathynaut Resolve
 
-Ferramentas existentes normalmente resolvem apenas um lado desse problema — ou constroem um grafo AST de chamadas (muitas vezes exigindo ambientes Python ou expondo dezenas de tools MCP fragmentadas) ou gerenciam notas em Markdown sem integração com a AST do código.
+Quando um agente de codificação (Antigravity, Claude Code, Cursor, Windsurf, Copilot) edita arquivos em repositórios reais, ele enfrenta dois pontos cegos críticos:
+1. **Cegueira Estrutural**: Buscas textuais (`grep`) ou leitura de trechos isolados não revelam quais chamadores transitivos, fluxos de execução ou testes serão quebrados em outros módulos antes da edição ser feita.
+2. **Amnésia entre Sessões**: Decisões arquiteturais, invariantes de segurança e correções de bugs passados documentados em Markdown raramente ficam conectados às funções e arquivos específicos que governam — fazendo o agente reintroduzir regressões já resolvidas.
+
+### Como o Bathynaut Resolve (Em 1 Comando)
+
+O Bathynaut equipa seu agente com **visão estrutural local** e **memória causal persistente** por meio de ferramentas nativas do Model Context Protocol (MCP) e hooks de ciclo de vida:
+
+- 📡 **Radar Pré-Edição (`bathynaut_sonar`)**: Antes de salvar um arquivo, o agente recebe automaticamente o raio de impacto (*blast radius* AST), a cadeia de chamadores, a cobertura de testes e os invariantes obrigatórios daquela área (`blocking_invariants`).
+- 🗺️ **Topologia de Módulos (`bathynaut_dive`)**: Mapeia clusters funcionais (comunidades Louvain) e pontos de gravidade do código (God Nodes via PageRank), fazendo o agente respeitar as fronteiras entre subsistemas em vez de criar acoplamentos indevidos.
+- 🧠 **Memória Viva de Decisões (`bathynaut_recall` / `bathynaut_log_adr`)**: Conecta registros de decisão arquitetural (ADRs), padrões e incidentes passados diretamente aos símbolos de código correspondentes (`applies_to`, `symbols` e menções inline `` `simbolo()` ``), com detecção automática de defasagem (`needs_review`).
+
+### O Ganho na Prática
+
+- ⚡ **Drástica redução no consumo de tokens e latência**: Em vez do agente gastar dezenas de chamadas de `grep` e leitura de arquivos inteiros tentando adivinhar dependências, uma única chamada entrega exatamente as assinaturas, chamadores e decisões relevantes dentro de um orçamento estrito (`token_budget`).
+- 🛡️ **Refatorações seguras e menos regressões**: O agente enxerga de antemão todos os pontos impactados, o nível de risco da alteração e quais testes cobrem (ou faltam cobrir) a função antes de modificá-la.
+- 🔄 **Zero repetição de contexto entre sessões e editores**: Você para de reexplicar as mesmas regras de negócio a cada novo chat — o contexto ativo (`activeContext.md`) e os invariantes de arquitetura acompanham o repositório no Antigravity, Claude Code, Cursor, Windsurf, Gemini CLI e Copilot.
+- 📐 **Documentação que não apodrece em silêncio**: Como as notas de decisão são ancoradas nos nós da AST, qualquer alteração em uma função governada marca automaticamente a ADR para revisão (`needs_review`).
+
+**100% determinístico, offline e privado.** Zero chamadas a APIs externas e zero chunks vetoriais arbitrários — tudo reside em um único banco SQLite local (`.bathynaut/ocean.db`) com `web-tree-sitter` (WASM), busca híbrida FTS5 BM25 + PageRank e TypeScript puro.
 
 | Dimensão | Grafos Apenas de AST | Servidores de Notas Markdown | Bathynaut |
 | :--- | :--- | :--- | :--- |

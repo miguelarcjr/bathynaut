@@ -4,6 +4,8 @@
 
 # Bathynaut
 
+> **Stop AI coding agents from breaking your architecture or forgetting past technical decisions.**
+
 **Local AST code graph, topological analyzer, and ADR/Zettelkasten memory server (MCP) for AI coding agents.**
 
 [English](README.md) | [Português (Brasil)](README.pt-BR.md)
@@ -13,8 +15,6 @@
 [![Node.js >= 18](https://img.shields.io/badge/node-%3E%3D18%20(22%2B%20native%20sqlite)-16a34a?style=flat-square)](https://nodejs.org)
 [![TypeScript 5.6](https://img.shields.io/badge/TypeScript-5.6-2563eb?style=flat-square)](https://www.typescriptlang.org)
 [![MCP Stdio](https://img.shields.io/badge/MCP-stdio-7c3aed?style=flat-square)](https://modelcontextprotocol.io)
-
-Bathynaut indexes your repository's abstract syntax tree (via `web-tree-sitter` WASM), computes module topology (Louvain clustering and PageRank centrality), and links source code symbols directly to architectural decision records (ADRs), incidents, and patterns stored in plain Markdown. Everything lives in a single local SQLite database (`.bathynaut/ocean.db`) exposed over the Model Context Protocol (MCP) with zero external API calls.
 
 ---
 
@@ -36,11 +36,28 @@ Bathynaut indexes your repository's abstract syntax tree (via `web-tree-sitter` 
 
 ## Overview & Design Goals
 
-AI coding agents typically struggle with two structural limitations in medium-to-large repositories:
-1. **Structural blindness**: Grepping files or reading raw chunks does not reveal transitive callers, execution flows, or test coverage before an edit is made.
-2. **Stateless sessions**: Architectural decisions, past regressions, and domain invariants documented in Markdown are rarely linked to the specific functions or files they govern.
+### The Problem Bathynaut Solves
 
-Existing tools usually address only one side of this problem—either building an AST call graph (often requiring Python toolchains or exposing dozens of granular MCP tools) or managing a flat folder of Markdown notes without AST awareness.
+When an AI coding agent (Antigravity, Claude Code, Cursor, Windsurf, Copilot) edits a file in a non-trivial repository, it faces two critical blindspots:
+1. **Structural Blindness**: Grepping files or reading isolated chunks does not reveal which transitive callers, execution flows, or tests will break downstream before an edit is made.
+2. **Session Amnesia**: Architectural trade-offs, security invariants, and past bug postmortems documented in Markdown are rarely linked to the specific functions or files they govern—causing agents to repeatedly reintroduce resolved issues.
+
+### How Bathynaut Solves It (In 1 Command)
+
+Bathynaut equips your AI agent with **local structural awareness** and **persistent causal memory** through standard Model Context Protocol (MCP) tools and lifecycle hooks:
+
+- 📡 **Pre-Edit Radar (`bathynaut_sonar`)**: Before saving an edit, the agent automatically receives the AST blast radius, affected call chains, test coverage, and active architectural invariants (`blocking_invariants`).
+- 🗺️ **Subsystem Topology (`bathynaut_dive`)**: Maps functional module clusters (Louvain communities) and high-centrality gravity centers (PageRank God Nodes) so the agent respects subsystem boundaries instead of introducing cross-layer coupling.
+- 🧠 **Living ADR Memory (`bathynaut_recall` / `bathynaut_log_adr`)**: Links architectural decision records (ADRs), patterns, and incident postmortems directly to code symbols (`applies_to`, `symbols`, and inline `` `symbol()` `` mentions) with automatic drift detection (`needs_review`).
+
+### What You Gain in Practice
+
+- ⚡ **Lower token usage and faster turns**: Instead of burning dozens of `grep` and full-file read calls trying to trace dependencies, a single tool call returns exact signatures, callers, and governing decisions packed within a strict `token_budget`.
+- 🛡️ **Safer refactors and fewer regressions**: The agent sees every downstream caller, risk score, and covering (or missing) test before modifying a function.
+- 🔄 **Zero context re-prompting across sessions and IDEs**: Stop re-explaining architectural rules in every new chat—session state (`activeContext.md`) and blocking invariants travel with the repository across Antigravity, Claude Code, Cursor, Windsurf, Gemini CLI, and Copilot.
+- 📐 **Documentation that never silently rots**: Because ADRs are anchored to AST nodes, modifying a governed function automatically flags the decision with `needs_review`.
+
+**100% deterministic, offline, and private.** Zero external API calls and zero arbitrary vector chunks—everything lives in a single local SQLite database (`.bathynaut/ocean.db`) powered by `web-tree-sitter` (WASM), FTS5 BM25 + PageRank hybrid search, and pure TypeScript.
 
 | Dimension | AST-Only Code Graphs | Markdown Memory Servers | Bathynaut |
 | :--- | :--- | :--- | :--- |
