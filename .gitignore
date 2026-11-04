@@ -4,3 +4,9 @@ dist/
 .bathynaut/
 .env
 .DS_Store
+
+# Artifacts & Skills
+artifacts/
+.agents/skills/
+skills-lock.json
+

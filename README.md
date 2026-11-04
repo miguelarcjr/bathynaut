@@ -22,7 +22,6 @@
 
 - [Overview & Design Goals](#overview--design-goals)
 - [Quick Start](#quick-start)
-- [Automated Agent Setup Prompt](#automated-agent-setup-prompt)
 - [Architecture](#architecture)
 - [Memory Vault & Semantic Relations](#memory-vault--semantic-relations)
 - [MCP Tools Reference](#mcp-tools-reference)
@@ -71,6 +70,32 @@ Bathynaut equips your AI agent with **local structural awareness** and **persist
 
 ## Quick Start
 
+### 🤖 The Easiest Way: Automated Agent Setup Prompt
+
+Just copy and paste the prompt below directly into your AI agent chat (Claude Code, Cursor, Antigravity, Windsurf, Copilot). Your agent will run the installation, verify all generated files, and configure its own MCP tools automatically:
+
+<details open>
+<summary><b>Copy-Paste Agent Setup Prompt (Click to collapse)</b></summary>
+
+```markdown
+Install and initialize Bathynaut in this repository by running the following steps:
+
+1. Initialize:
+   - Run `npx bathynaut init -d "."` in the repository root (or if using a local Bathynaut checkout, build it with `npm run build` and run `node <path-to-bathynaut>/dist/cli/main.js init -d "."`).
+
+2. Verify generated files:
+   - Memory vault in `.bathynaut/memory/` (or `.agents/memory/`) containing `activeContext.md`, `index.md`, and `wiki/{decisions,incidents,patterns,entities,architecture}`.
+   - SQLite database `.bathynaut/ocean.db` and HTML viewer `.bathynaut/bathynaut.html`.
+   - Agent rules (`AGENTS.md`, `GEMINI.md`, `CLAUDE.md`, `.cursor/rules/bathynaut.mdc`), skills (`.agents/skills/bathynaut-*`), and hooks.
+
+3. Run initial diagnostics:
+   - Run `npx bathynaut doctor` (or call `bathynaut_lint` and `bathynaut_dive`) and summarize the detected modules, entrypoints, and any undocumented subsystems.
+```
+
+</details>
+
+### Or Run Manually via CLI
+
 ```bash
 cd your-project
 npx bathynaut init
@@ -95,32 +120,6 @@ Running `bathynaut init` performs four steps:
 | Audit graph integrity (orphans, broken links, stale ADRs) | `npx bathynaut doctor` | *"Run `bathynaut-wiki-lint`"* |
 | Save session state to `activeContext.md` | — | *"Run `bathynaut-session-checkpoint`"* |
 | Remove injected rules, hooks, and MCP configs | `npx bathynaut disconnect` | *"Run `npx bathynaut disconnect`"* |
-
----
-
-## Automated Agent Setup Prompt
-
-If you prefer to let your AI coding agent install and verify Bathynaut on its own, paste the prompt below into your agent chat:
-
-<details>
-<summary><b>Copy-Paste Agent Setup Prompt</b></summary>
-
-```markdown
-Install and initialize Bathynaut in this repository by running the following steps:
-
-1. Initialize:
-   - Run `npx bathynaut init -d "."` in the repository root (or if using a local Bathynaut checkout, build it with `npm run build` and run `node <path-to-bathynaut>/dist/cli/main.js init -d "."`).
-
-2. Verify generated files:
-   - Memory vault in `.bathynaut/memory/` (or `.agents/memory/`) containing `activeContext.md`, `index.md`, and `wiki/{decisions,incidents,patterns,entities,architecture}`.
-   - SQLite database `.bathynaut/ocean.db` and HTML viewer `.bathynaut/bathynaut.html`.
-   - Agent rules (`AGENTS.md`, `GEMINI.md`, `CLAUDE.md`, `.cursor/rules/bathynaut.mdc`), skills (`.agents/skills/bathynaut-*`), and hooks.
-
-3. Run initial diagnostics:
-   - Run `npx bathynaut doctor` (or call `bathynaut_lint` and `bathynaut_dive`) and summarize the detected modules, entrypoints, and any undocumented subsystems.
-```
-
-</details>
 
 ---
 
